@@ -1,16 +1,6 @@
-# This is the program for CSC207 Phase 2.
+# This is the program for Software Design Phase 3.
 
-## Authors Phase 1: 
-- Jingchen Liang
-- Dian Qing
-- Yuewei Wang
-- Yongyi Xu
-- Yu Xue
-- Vanessa Huiting Yu
-- Xingyu Yue
-- Ziqi Zhu
-
-## Authors Phase 2: 
+## Authors: 
 - Yu Xue
 - Xingyu Yue
 
