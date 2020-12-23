@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>account</OriginalElement>
+  <nodes>
+    <node x="0.0" y="606.0">account.VIPAttendee</node>
+    <node x="751.9750000000001" y="955.0">account.AccountManager</node>
+    <node x="1189.9750000000001" y="978.0">account.AccountPresenter</node>
+    <node x="888.0000000000001" y="606.0">account.Speaker</node>
+    <node x="1188.7250000000001" y="1747.0">account.AccountSystem</node>
+    <node x="584.7327272727274" y="850.0">account.AccountFactory</node>
+    <node x="592.0000000000001" y="617.5">account.Attendee</node>
+    <node x="762.4750000000001" y="1770.0">account.AccountEventSystem</node>
+    <node x="296.0" y="606.0">account.Organizer</node>
+    <node x="672.7212121212121" y="0.0">account.Account</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="account.AccountManager" target="account.AccountFactory">
+      <point x="-156.75" y="-361.0" />
+      <point x="804.2250000000001" y="935.0" />
+      <point x="656.4827272727274" y="935.0" />
+      <point x="-71.75" y="27.5" />
+    </edge>
+    <edge source="account.AccountEventSystem" target="account.AccountManager">
+      <point x="-146.25" y="-120.0" />
+      <point x="811.2250000000001" y="1727.0" />
+      <point x="804.2250000000001" y="1727.0" />
+      <point x="-156.75" y="361.0" />
+    </edge>
+    <edge source="account.Speaker" target="account.Account">
+      <point x="-69.0" y="-97.0" />
+      <point x="957.0000000000001" y="586.0" />
+      <point x="884.8575757575759" y="586.0" />
+      <point x="32.636363636363626" y="258.0" />
+    </edge>
+    <edge source="account.AccountFactory" target="account.Attendee">
+      <point x="0.0" y="-27.5" />
+      <point x="728.2327272727274" y="830.0" />
+      <point x="730.0000000000001" y="830.0" />
+      <point x="0.0" y="85.5" />
+    </edge>
+    <edge source="account.AccountSystem" target="account.AccountManager">
+      <point x="-39.5" y="-143.0" />
+      <point x="1307.2250000000001" y="1697.0" />
+      <point x="1117.7250000000001" y="1697.0" />
+      <point x="156.75" y="361.0" />
+    </edge>
+    <edge source="account.Attendee" target="account.Account">
+      <point x="69.0" y="-85.5" />
+      <point x="799.0000000000001" y="586.0" />
+      <point x="852.2212121212121" y="586.0" />
+      <point x="0.0" y="258.0" />
+    </edge>
+    <edge source="account.AccountSystem" target="account.AccountPresenter">
+      <point x="39.5" y="-143.0" />
+      <point x="39.25" y="338.0" />
+    </edge>
+    <edge source="account.AccountManager" target="account.Account">
+      <point x="156.75" y="-361.0" />
+      <point x="1117.7250000000001" y="935.0" />
+      <point x="1210.6000000000001" y="935.0" />
+      <point x="1210.6000000000001" y="546.0" />
+      <point x="1015.4030303030304" y="546.0" />
+      <point x="163.18181818181813" y="258.0" />
+    </edge>
+    <edge source="account.AccountFactory" target="account.Speaker">
+      <point x="57.39999999999998" y="-27.5" />
+      <point x="785.6327272727274" y="820.0" />
+      <point x="1026.0" y="820.0" />
+      <point x="0.0" y="97.0" />
+    </edge>
+    <edge source="account.AccountFactory" target="account.Account">
+      <point x="114.79999999999995" y="-27.5" />
+      <point x="843.0327272727274" y="830.0" />
+      <point x="1174.5" y="830.0" />
+      <point x="1174.5" y="566.0" />
+      <point x="950.1303030303031" y="566.0" />
+      <point x="97.90909090909088" y="258.0" />
+    </edge>
+    <edge source="account.VIPAttendee" target="account.Account">
+      <point x="-69.0" y="-97.0" />
+      <point x="69.0" y="536.0" />
+      <point x="689.0393939393941" y="536.0" />
+      <point x="-163.18181818181813" y="258.0" />
+    </edge>
+    <edge source="account.AccountFactory" target="account.VIPAttendee">
+      <point x="-114.80000000000007" y="-27.5" />
+      <point x="613.4327272727273" y="830.0" />
+      <point x="138.0" y="830.0" />
+      <point x="0.0" y="97.0" />
+    </edge>
+    <edge source="account.Organizer" target="account.Account">
+      <point x="-69.0" y="-97.0" />
+      <point x="365.0" y="556.0" />
+      <point x="754.3121212121214" y="556.0" />
+      <point x="-97.90909090909088" y="258.0" />
+    </edge>
+    <edge source="account.AccountFactory" target="account.Organizer">
+      <point x="-57.39999999999998" y="-27.5" />
+      <point x="670.8327272727274" y="820.0" />
+      <point x="434.0" y="820.0" />
+      <point x="0.0" y="97.0" />
+    </edge>
+    <edge source="account.AccountEventSystem" target="account.AccountPresenter">
+      <point x="48.75" y="-120.0" />
+      <point x="1006.2250000000001" y="1717.0" />
+      <point x="1229.2250000000001" y="1717.0" />
+      <point x="-117.75" y="338.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.5795908426692644" x="600.3624765641755" y="937.8889600191378" />
+  <SelectedNodes>
+    <node>account.Account</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

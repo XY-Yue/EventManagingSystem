@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>room</OriginalElement>
+  <nodes>
+    <node x="297.0" y="105.0">room.Room</node>
+    <node x="285.0" y="475.0">room.RoomManager</node>
+    <node x="150.5" y="914.0">room.RoomSystem</node>
+    <node x="0.0" y="441.0">room.RoomPresenter</node>
+    <node x="253.5" y="0.0">room.Available</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="room.RoomManager" target="room.Room">
+      <point x="-155.0" y="-177.5" />
+      <point x="362.5" y="416.0" />
+      <point x="370.5" y="416.0" />
+      <point x="-147.0" y="143.0" />
+    </edge>
+    <edge source="room.RoomSystem" target="room.RoomManager">
+      <point x="37.375" y="-143.0" />
+      <point x="337.375" y="889.0" />
+      <point x="401.25" y="889.0" />
+      <point x="-116.25" y="177.5" />
+    </edge>
+    <edge source="room.Room" target="room.Available">
+      <point x="0.0" y="-143.0" />
+      <point x="0.0" y="27.5" />
+    </edge>
+    <edge source="room.RoomSystem" target="room.RoomPresenter">
+      <point x="-112.125" y="-143.0" />
+      <point x="187.875" y="889.0" />
+      <point x="66.25" y="889.0" />
+      <point x="-66.25" y="211.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="293.0" y="147.0" />
+  <SelectedNodes>
+    <node>room.Available</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
