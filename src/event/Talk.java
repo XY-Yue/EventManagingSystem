@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
 
 /**
  * An entity class which extends abstract class event, representing a Event with only one speaker
@@ -17,16 +18,15 @@ class Talk extends Event {
     /**
      * Constructs a Talk object
      * @param name name of the Talk
-     * @param startTime The start time of this Talk
-     * @param endTime The end time of this Talk
+     * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location room name of the Talk held in
      * @param description description of the Talk
      * @param capacity the max number of people can participate in the Talk
      * @param id The unique ID of the Talk
      */
-    Talk(String name, Timestamp startTime, Timestamp endTime, String location,
-                   String description, int capacity, String id) {
-        super(name, startTime, endTime, location, description, capacity, id);
+    Talk(String name, SortedSet<Timestamp[]> duration , String location,
+         String description, int capacity, String id) {
+        super(name, duration, location, description, capacity, id);
     }
 
     /**

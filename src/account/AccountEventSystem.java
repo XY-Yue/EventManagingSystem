@@ -76,16 +76,15 @@ public class AccountEventSystem {
             presenter.printErrorMessage("This event is only available for VIPs");
             return;
         }
-        Timestamp myTime = eventManager.getTime(eventId);
-        Timestamp endTime = eventManager.getEndTime(eventId);
+        SortedSet<Timestamp[]> timeDuration = eventManager.getEventDuration(eventId);
         if(!eventManager.isValidEvent(eventId)) {
             presenter.printPassedEvent(eventId);
         }
         else if (!eventManager.canSignup(eventId)) presenter.signupFailEventFull();
 
-        else if (!accountManager.freeAtTime(myTime, endTime, username)) presenter.signupFailNotFree();
+        else if (!accountManager.freeAtTime(timeDuration, username)) presenter.signupFailNotFree();
         else{
-            presenter.signUpEventResult(accountManager.signUpEvent(myTime, endTime, eventId, username));
+            presenter.signUpEventResult(accountManager.signUpEvent(timeDuration, eventId, username));
             if (accountManager.isAccountType(username, "vip")) {
                 accountManager.addToSpecialList(eventId, username);
             }
@@ -96,20 +95,20 @@ public class AccountEventSystem {
     /**
      * Prints a string reflecting the result of cancel the enrollment of an event.
      * @param username The username of current user.
-     * @param eventManager A alias of EventManager use case.
+     * @param eventManager An alias of EventManager use case.
      */
     public void cancelEvent(String username, EventManager eventManager) {
         String eventId = getValidEvent(eventManager);
         if (eventId == null) return;
         if (eventManager.hasAttendee(eventId, username)) {
-            Timestamp myTime = eventManager.getTime(eventId);
-            Timestamp endTime = eventManager.getEndTime(eventId);
+            SortedSet<Timestamp[]> timeDuration = eventManager.getEventDuration(eventId);
             Timestamp currTime = new Timestamp(new Date().getTime());
-            if (currTime.after(myTime)) {
+            Timestamp firstStartTime = timeDuration.first()[0];
+            if (currTime.after(firstStartTime)) {
                 presenter.printEventExpired(eventId);
                 return;
             }
-            presenter.cancelEventResult(accountManager.cancelEvent(myTime, endTime, eventId, username));
+            presenter.cancelEventResult(accountManager.cancelEvent(timeDuration, eventId, username));
             eventManager.removeAttendee(username, eventId);
         } else {
             presenter.userNotSignUpEvent(username, eventId);
@@ -148,12 +147,12 @@ public class AccountEventSystem {
      */
     public void viewEventsAttendable(String username, EventManager eventManager, boolean isVIP) {
         boolean accountIsVip = accountManager.checkVIP(username);
-        List<String[]> allEvents = eventManager.getEventsAttendable(
-                accountManager.getAvailableTime(eventManager.getTimeList(), username), isVIP, accountIsVip);
+        Map<String, SortedSet<Timestamp[]>> m = eventManager.getAllEventTime(accountIsVip, isVIP);
+        List<String> allEvents = accountManager.getAvailableEvent(m, username);
         if (allEvents.size() == 0) {
             presenter.printNotAvailable();
         } else {
-            presenter.printEventList(allEvents, "Here are all events you are able to attend:");
+            presenter.printEventList(allEvents, m, "Here are all events you are able to attend:");
         }
     }
 

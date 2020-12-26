@@ -5,6 +5,8 @@ import conferencemain.MainPresenter;
 import java.sql.Timestamp;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedSet;
 
 /**
  * A presenter class for account.
@@ -248,14 +250,22 @@ class AccountPresenter extends MainPresenter {
 
     /**
      * Prints out the list of toString description of events to user.
-     * If the list is empty, prints out "There is no event."
-     * @param events a list of event id and name
+     * @param events A list of event id
+     * @param m A map that maps event id to its duration
      * @param message additional message
      */
-    void printEventList(List<String[]> events, String message) {
+    void printEventList(List<String> events, Map<String, SortedSet<Timestamp[]>> m, String message) {
         System.out.println(message);
-        for(String[] s : events) {
-            System.out.println("Starting Time: " + s[0] + ", End Time: " + s[1] + ", Event Id: " + s[2] + ", Event Name: " + s[3]);
+//        for(String[] s : events) {
+//            System.out.println("Starting Time: " + s[0] + ", End Time: " + s[1] + ", Event Id: " + s[2] + ", Event Name: " + s[3]);
+//        }
+        for (String eventId : events) {
+            System.out.println("Event Id: " + eventId);
+            System.out.println("Event Duration: ");
+            for (Timestamp[] t : m.get(eventId)) {
+                System.out.println("\tStarting Time: " + t[0] + ", End Time: " + t[1]);
+            }
+            super.printSeparateLine();
         }
     }
 

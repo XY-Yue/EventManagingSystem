@@ -6,7 +6,7 @@ import java.util.*;
 import java.sql.Timestamp;
 
 /**
- * An abstract entity class of events, stores name, ID, start time, end time, location, description, capacity,
+ * An abstract entity class of events, stores name, ID, durationw, location, description, capacity,
  * and a list of attendees of the event.
  * Abstract because there are different kind of events.
  * Methods in this class are some getter and setter for attributes in this class.
@@ -16,8 +16,7 @@ import java.sql.Timestamp;
 abstract class Event implements Serializable {
     private final String name;
     private final String ID;
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private SortedSet<Timestamp[]> duration;
     private String location;
     private final String description;
     private int capacity;
@@ -28,19 +27,17 @@ abstract class Event implements Serializable {
     /**
      * Constructs a event object
      * @param name name of the new event
-     * @param startTime The start time of this event
-     * @param endTime The end time of this event
+     * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location room name of the new event held in
      * @param description description of the new event
      * @param capacity the max number of people can participate in the new event
      * @param id The unique ID of the event
      */
-    protected Event(String name, Timestamp startTime, Timestamp endTime, String location,
+    protected Event(String name, SortedSet<Timestamp[]> duration, String location,
                     String description, int capacity, String id){
         this.name = name;
         this.ID = id;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.duration = duration;
         this.location = location;
         this.description = description;
         this.capacity = capacity;
@@ -66,19 +63,11 @@ abstract class Event implements Serializable {
     }
 
     /**
-     * Gets start time of this event.
-     * @return start time of event
+     *  Gets event duration
+     * @return An iterator of event duration
      */
-    protected Timestamp getStartTime() {
-        return startTime;
-    }
-
-    /**
-     * Gets end time of this event.
-     * @return end time of event
-     */
-    protected Timestamp getEndTime() {
-        return endTime;
+    protected Iterator<Timestamp[]> getDuration() {
+        return this.duration.iterator();
     }
 
     /**
@@ -100,12 +89,10 @@ abstract class Event implements Serializable {
 
     /**
      * Sets start time of this event. Gives a new start time to event.
-     * @param newStart new start time we want to set for event
-     * @param endTime the new end time of this event
+     * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      */
-    protected void setTime(Timestamp newStart, Timestamp endTime) {
-        startTime = newStart;
-        this.endTime = endTime;
+    protected void setTime(SortedSet<Timestamp[]> duration) {
+        this.duration = new TreeSet<>(duration);
     }
 
     /**
@@ -128,6 +115,22 @@ abstract class Event implements Serializable {
     }
 
     /**
+     * Prints event duration
+     * @return A String representation of this event duration
+     */
+    protected String printEventDuration() {
+        StringBuilder sb = new StringBuilder();
+        for (Timestamp[] item : this.duration) {
+            sb.append("\t");
+            sb.append(getTime(item[0]));
+            sb.append(" to ");
+            sb.append(getTime(item[1]));
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    /**
      * Gives the toString information of this event in a string.
      * The information contains name, start time, location, capacity and description.
      * @return the String of information of the event, contains name, start time, location, capacity and description
@@ -135,7 +138,8 @@ abstract class Event implements Serializable {
     public String toString(){
         return this.getType() + ": " + name + "\n" +
                 ((isVIP) ? "VIP ONLY\n" : "") +
-                "Time of event: " + getTime(startTime) + " to " + getTime(endTime) + "\n" +
+                "Time of event: \n" + // + getTime(startTime) + " to " + getTime(endTime) + "\n" +
+                this.printEventDuration() +
                 "Location of event: " + location + "\n" +
                 "Capacity of event: " + capacity + "\n" +
                 "Description of event :" + description + "\n";
@@ -237,6 +241,18 @@ abstract class Event implements Serializable {
      */
     protected Iterator<String> getRequiredFeatures(){
         return requiredFeatures.iterator();
+    }
+
+    /**
+     * Gets the first start time of event duration
+     * @return First start time of event duration, null if duration length == 0
+     */
+    protected Timestamp getFirstTime() {
+        try {
+            return this.duration.first()[0];
+        } catch (IndexOutOfBoundsException ie) {
+            return null;
+        }
     }
 
 }

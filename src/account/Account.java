@@ -110,18 +110,16 @@ public abstract class Account implements Serializable, Available {
      * @param startTime Represents the start time of the event
      * @param endTime Represents the end time of the event
      * @param id A String representing the id of event want to be canceled.
-     * @return true iff this account canceled the given event successfully, false if the cancellation fails.
      */
-    protected boolean removeEvent(Timestamp startTime, Timestamp endTime, String id) {
+    protected void removeEvent(Timestamp startTime, Timestamp endTime, String id) {
         for (Timestamp[] k : schedule.keySet()) {
             if(k[0].equals(startTime) && k[1].equals(endTime)) {
                 if (schedule.get(k).equals(id)) {
                     schedule.remove(k);
-                    return true;
+                    return;
                 }
             }
         }
-        return false;
     }
 
     /**

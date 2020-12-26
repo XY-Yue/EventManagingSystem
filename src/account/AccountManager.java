@@ -99,35 +99,65 @@ public class AccountManager implements Serializable {
     }
 
     /**
+     * Checks if a given account is available at given time interval list
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
+     * @param user A String representation of username
+     * @return true iff this account exists and is available at given time list
+     */
+    public boolean freeAtTime(SortedSet<Timestamp[]> timeDuration, String user) {
+        Account account = findAccountByUsername(user);
+        if (account == null) {
+            return false;
+        }
+        for (Timestamp[] t : timeDuration) {
+            if (!account.isAvailable(t[0], t[1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Signs up a event for an account at a given time interval
-     * @param startTime Represents the start of the event
-     * @param endTime Represents the end of the event
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param event A string represents the unique id of this event.
      * @param username A string represents the username of an account.
-     * @return true iff this account exists and is available at the given time, false if this account does not exist
-     * or is not available at that time to attend this event.
+     * @return true iff this account exists and is available at the given time list
      */
-    public boolean signUpEvent(Timestamp startTime, Timestamp endTime, String event, String username){
+    public boolean signUpEvent(SortedSet<Timestamp[]> timeDuration, String event, String username){
         Account curAccount = findAccountByUsername(username);
-        if (curAccount != null && curAccount.isAvailable(startTime, endTime)){
-            curAccount.addEvent(startTime, endTime, event);
-            return true;
+        if (curAccount == null){
+            // curAccount.addEvent(startTime, endTime, event);
+            return false;
         }
-        return false;
+        for (Timestamp[] t : timeDuration) {
+            if (!curAccount.isAvailable(t[0], t[1])) {
+                return false;
+            }
+        }
+        for (Timestamp[] t : timeDuration) {
+            curAccount.addEvent(t[0], t[1], event);
+        }
+        return true;
     }
 
     /**
      * Cancels a event for an account at a given time interval
-     * @param startTime Represents the start of the event
-     * @param endTime Represents the end of the event
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param event A string represents the unique id of this event.
      * @param username A string represents the username of this account.
      * @return true iff this account exists and the event can be removed from account's eventList successfully,
      * false if this account does not exist or the removing fails.
      */
-    public boolean cancelEvent(Timestamp startTime, Timestamp endTime, String event, String username){
+    public boolean cancelEvent(SortedSet<Timestamp[]> timeDuration, String event, String username){
         Account curAccount = findAccountByUsername(username);
-        return curAccount != null && curAccount.removeEvent(startTime, endTime, event);
+        if (curAccount == null) {
+            return false;
+        }
+        for (Timestamp[] t : timeDuration) {
+            curAccount.removeEvent(t[0], t[1], event);
+        }
+        return true;
     }
 
     /**
@@ -318,34 +348,38 @@ public class AccountManager implements Serializable {
     }
 
     /**
-     * Gets available time that the user is free
-     * @param lst List of time
-     * @param username Username of this user
-     * @return List of available time
+     * Gets available event id that user is free and can join
+     * @param m A map that maps the event id to its duration
+     * @param username A String representation of account's username
+     * @return A list of event id that user is free and can join
      */
-    List<Timestamp[]> getAvailableTime(List<Timestamp[]> lst, String username) {
-        List<Timestamp[]> availableTime = new ArrayList<>();
-        Timestamp currTime = new Timestamp(new Date().getTime());
-        for (Timestamp[] t : lst) {
-            if(freeAtTime(t[0], t[1], username) && currTime.before(t[0])) {
-                availableTime.add(new Timestamp[]{t[0], t[1]});
+    List<String> getAvailableEvent(Map<String, SortedSet<Timestamp[]>> m, String username) {
+        List<String> o = new ArrayList<>();
+        for (String eventId : m.keySet()) {
+            if (freeAtTime(m.get(eventId), username)) {
+                o.add(eventId);
             }
         }
-        return availableTime;
+        return o;
     }
+
 
     /**
      * Finds all speakers that are free at the given time interval
-     * @param start The start of this time interval
-     * @param end The end of this time interval
+     * @param eventDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @return A list of speaker IDs that corresponds to speakers that are free at this time interval
      */
-    public List<String> getAvailableSpeakers(Timestamp start, Timestamp end){
+    public List<String> getAvailableSpeakers(SortedSet<Timestamp[]> eventDuration){
         List<String> result = new ArrayList<>();
         Map<String, Account> map = allAccounts.get("speaker");
         if (map != null) {
             for (String speaker : map.keySet()) {
-                if (this.freeAtTime(start, end, speaker)) result.add(speaker);
+                for (Timestamp[] t : eventDuration) {
+                    if (!this.freeAtTime(t[0], t[1], speaker)) {
+                        break;
+                    }
+                }
+                result.add(speaker);
             }
         }
         return result;

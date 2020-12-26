@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
 
 /**
  * A party, which is a sub class of event, and it has no speaker
@@ -15,16 +16,15 @@ class Party extends Event  {
     /**
      * Constructs a Party object
      * @param name name of the Party
-     * @param startTime The start time of this Party
-     * @param endTime The end time of this Party
+     * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location room name of the Party held in
      * @param description description of the Party
      * @param capacity the max number of people can participate in the Party
      * @param id The unique ID of the Party
      */
-    Party(String name, Timestamp startTime, Timestamp endTime, String location,
-                    String description, int capacity, String id) {
-        super(name, startTime, endTime, location, description, capacity, id);
+    Party(String name, SortedSet<Timestamp[]> duration, String location,
+          String description, int capacity, String id) {
+        super(name, duration, location, description, capacity, id);
     }
 
     /**

@@ -115,24 +115,29 @@ class Room implements Serializable, Available{
 
     /**
      * Adds the event to the schedule
-     * @param startTime Star time of the given interval
-     * @param endTime End time of the given interval
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param eventID A String representation of the event id
      * @return true iff event is added successfully
      */
-    protected boolean addEventToSchedule(Timestamp startTime, Timestamp endTime, String eventID) {
-        return schedule.putIfAbsent(new Timestamp[]{startTime, endTime}, eventID) == null;
+    protected boolean addEventToSchedule(SortedSet<Timestamp[]> timeDuration, String eventID) {
+        // return schedule.putIfAbsent(new Timestamp[]{startTime, endTime}, eventID) == null
+        for (Timestamp[] t : timeDuration) {
+            this.schedule.put(t, eventID);
+        }
+        return true; // Since we already check for available room
     }
 
     /**
      * Removes the event from the schedule
-     * @param startTime Start time of the given interval
-     * @param endTime End time of the given interval
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param eventName A String representation of the event id
      * @return true iff the event is removed successfully
      */
-    protected boolean removeEventFromSchedule(Timestamp startTime, Timestamp endTime, String eventName) {
-        return schedule.remove(new Timestamp[]{startTime, endTime}, eventName);
+    protected boolean removeEventFromSchedule(SortedSet<Timestamp[]> timeDuration, String eventName) {
+        for (Timestamp[] t : timeDuration) {
+            schedule.remove(t, eventName);
+        }
+        return true; // Since we already check it
     }
 
     // This is a helper method for toString

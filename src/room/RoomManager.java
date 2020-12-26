@@ -39,17 +39,16 @@ public class RoomManager implements Serializable {
 
     /**
      * Finds a list of room that satisfies all the given conditions
-     * @param start Required start time of the interval
-     * @param end Required end time of the interval
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param features Required a list of String representation of additional features
      * @param capacity Required capacity
      * @return A list of room name that satisfies all of the given conditions
      */
-    public List<String> availableRooms(Timestamp start, Timestamp end, List<String> features, int capacity){
+    public List<String> availableRooms(SortedSet<Timestamp[]> timeDuration, List<String> features, int capacity){
         List<String> result = new ArrayList<>();
         for (String room : roomList.keySet()){
             if (roomList.get(room) != null && roomList.get(room).hasFeatures(features)) {
-                if (this.checkRoomAvailability(start, end, room) && checkRoomTimeSlots(start, end, room))
+                if (this.checkRoomAvailability(timeDuration, room) && checkRoomTimeSlots(timeDuration, room))
                     if (roomList.get(room).getCapacity() >= capacity) {
                         result.add(room);
                     }
@@ -92,55 +91,79 @@ public class RoomManager implements Serializable {
 
     /**
      * Checks the room is available during the given time interval
-     * @param startTime Start time of the given interval
-     * @param endTime End time of the given interval
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param roomName A String representation of the room name
      * @return true iff the room is available during this interval
      */
-    public boolean checkRoomAvailability(Timestamp startTime, Timestamp endTime, String roomName){
+    public boolean checkRoomAvailability(SortedSet<Timestamp[]> timeDuration, String roomName){
         // Assume roomName is in the list
-        return roomList.get(roomName) != null && (roomList.get(roomName).isAvailable(startTime, endTime));
+        Room room = roomList.get(roomName);
+        if (room == null) {
+            return false;
+        }
+        for (Timestamp[] s : timeDuration) {
+            if (!room.isAvailable(s[0], s[1])) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    private boolean checkRoomTimeSlots(Timestamp startTime, Timestamp endTime, String roomName) {
+    /**
+     * Checks if this room is available with given time slot
+     * @param startTime Start time of the given time slot
+     * @param endTime End time of the given time slot
+     * @param roomName A String representation of the room name
+     * @return True iff room is available during this time slot
+     */
+    public boolean checkRoomAvailability(Timestamp startTime, Timestamp endTime, String roomName) {
+        Room room = roomList.get(roomName);
+        return room != null && room.isAvailable(startTime, endTime);
+    }
+
+    private boolean checkRoomTimeSlots(SortedSet<Timestamp[]> timeDuration, String roomName) {
         Room room = roomList.get(roomName);
         if (room == null) return false;
-        Timestamp copy = new Timestamp(startTime.getTime());
-        copy.setDate(startTime.getDate() + 1);
-        if (!endTime.before(copy)) {
-            return room.isValidTimeSlots(0, 24);
-        }
-        int minutes1 = startTime.getMinutes();
-        int hour1 = (minutes1 == 0) ? startTime.getHours() : startTime.getHours() - 1;
-        int minutes2 = endTime.getMinutes();
-        int hour2 = (minutes2 == 0) ? endTime.getHours() : endTime.getHours() + 1;
-        return room.isValidTimeSlots(hour1, hour2);
+        for (Timestamp[] s : timeDuration) {
+            Timestamp startTime = s[0];
+            Timestamp endTime = s[1];
+            Timestamp copy = new Timestamp(startTime.getTime());
+            copy.setDate(startTime.getDate() + 1);
+            if (!endTime.before(copy)) {
+                return room.isValidTimeSlots(0, 24);
+            }
+            int minutes1 = startTime.getMinutes();
+            int hour1 = (minutes1 == 0) ? startTime.getHours() : startTime.getHours() - 1;
+            int minutes2 = endTime.getMinutes();
+            int hour2 = (minutes2 == 0) ? endTime.getHours() : endTime.getHours() + 1;
+            if (!room.isValidTimeSlots(hour1, hour2)) {
+                return false;
+            }
+        } return true;
     }
 
     /**
      * Adds an event to a room
      * @param roomName A String representation of the room name
      * @param eventID A String representation of the event id
-     * @param time Start time of this event
-     * @param endTime End time of this event
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @return true iff the event is added successfully
      */
-    public boolean addEventToRoom(String roomName, String eventID, Timestamp time, Timestamp endTime) {
+    public boolean addEventToRoom(String roomName, String eventID, SortedSet<Timestamp[]> timeDuration) {
         // Return boolean not String so controller knows what needs to send to presenter
-        return roomList.get(roomName) != null && roomList.get(roomName).addEventToSchedule(time, endTime, eventID);
+        return roomList.get(roomName) != null && roomList.get(roomName).addEventToSchedule(timeDuration, eventID);
     }
 
     /**
      * Removes an event from a room
      * @param roomName A String representation of the room name
      * @param eventName A String representation of the event id
-     * @param time Start time of this event
-     * @param endTime End time of this event
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @return true iff the event is removed successfully
      */
-    public boolean removeEventFromRoom(String roomName, String eventName, Timestamp time, Timestamp endTime) {
+    public boolean removeEventFromRoom(String roomName, String eventName, SortedSet<Timestamp[]> timeDuration) {
         return roomList.get(roomName) != null && roomList.get(roomName).
-                removeEventFromSchedule(time, endTime, eventName);
+                removeEventFromSchedule(timeDuration, eventName);
     }
 
     /**

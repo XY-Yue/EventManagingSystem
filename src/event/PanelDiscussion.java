@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
 
 /**
  * A panel discussion, which is a sub class of event, and it has multiple speakers
@@ -17,16 +18,14 @@ class PanelDiscussion extends Event  {
     /**
      * Constructs a PanelDiscussion object
      * @param name name of the PanelDiscussion
-     * @param startTime The start time of this PanelDiscussion
-     * @param endTime The end time of this PanelDiscussion
+     * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location room name of the PanelDiscussion held in
      * @param description description of the PanelDiscussion
      * @param capacity the max number of people can participate in the PanelDiscussion
      * @param id The unique ID of the PanelDiscussion
      */
-    PanelDiscussion(String name, Timestamp startTime, Timestamp endTime,
-                              String location, String description, int capacity, String id) {
-        super(name, startTime, endTime, location, description, capacity, id);
+    PanelDiscussion(String name, SortedSet<Timestamp[]> duration, String location, String description, int capacity, String id) {
+        super(name, duration, location, description, capacity, id);
     }
 
     /**

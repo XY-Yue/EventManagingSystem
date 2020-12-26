@@ -18,8 +18,8 @@ import java.util.*;
 public class EventManager implements Serializable {
     // Type map to Hashmap <id, Event>
     private final Map<String, Map<String, Event>> eventList;
-    // Key startime, map a list of event happens during this time
-    // Value is a list of events starts with this time, String[] == {event id, event name}
+    // Key first star time, map a list of event happens during this time
+    // Value is a list of events starts with this time, String[] == {event time list to string, event id, event name}
     private final SortedMap<Timestamp, List<String[]>> eventSchedule;
     private int numEvents;
     private final String[] eventType = {"talk", "party", "panel discussion"};
@@ -66,8 +66,7 @@ public class EventManager implements Serializable {
         if (event == null) {
             return new String[]{getTime(t), "", value[0], value[1]};
         }
-        Timestamp endTime = event.getEndTime();
-        return new String[]{getTime(t), getTime(endTime), value[0], value[1]};
+        return new String[]{getTime(t), event.printEventDuration(), value[0], value[1]};
     }
 
     /**
@@ -102,59 +101,6 @@ public class EventManager implements Serializable {
     }
 
     /**
-     * Gets the time list in the schedule
-     * @return A list of time schedule
-     */
-    public List<Timestamp[]> getTimeList() {
-        List<Timestamp[]> timeList = new ArrayList<>();
-        Timestamp[] timeslot;
-        for(Timestamp key : this.eventSchedule.keySet()) {
-            for (String[] value : this.eventSchedule.get(key)) {
-                Event event = findEvent(value[0]);
-                if (event == null) continue;
-                timeslot = new Timestamp[2];
-                timeslot[0] = key;
-                timeslot[1] = event.getEndTime();
-                timeList.add(timeslot);
-            }
-        }
-        return timeList;
-    }
-
-    /**
-     * Gets the event that is attendable for the user, meaning the event has space, and user is free during the
-     * whole event
-     * @param availableTime time that is available for the user
-     * @param vip indicates if only VIP events are wanted
-     * @param accountIsVip indicates if the current account is vip or not
-     * @return A list of arrays where in the format [time, endTime, id, event name]
-     */
-    public List<String[]> getEventsAttendable(List<Timestamp[]> availableTime, boolean vip, boolean accountIsVip) {
-        List<String[]> lst = new ArrayList<>();
-        for (Timestamp[] t : availableTime) {
-            List<String[]> value = eventSchedule.get(t[0]);
-            for(String[] item : value) {
-                if (canSignup(item[0])) {
-                    Event event = this.findEvent(item[0]);
-                    if (event == null) {
-                        continue;
-                    }
-                    if(!vip) {
-                        if (!accountIsVip && !event.isVIP()) {
-                            lst.add(getEventScheduleValue(t[0], item));
-                        } else if (accountIsVip) {
-                            lst.add(getEventScheduleValue(t[0], item));
-                        }
-                    } else if (event.isVIP()) {
-                        lst.add(getEventScheduleValue(t[0], item));
-                    }
-                }
-            }
-        }
-        return lst;
-    }
-
-    /**
      * Checks if an event exist.
      * @param eventID id of the target event
      * @return true iff event exists
@@ -174,27 +120,26 @@ public class EventManager implements Serializable {
      * Assumes that it has been checked to make sure there is only one event in a given room.
      * Assumes that it has been checked to make sure the capacity does not exceed the room capacity.
      * @param name name of the new event
-     * @param startTime The start time of this event
-     * @param endTime The end time of this event
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location room name of the new event held in
      * @param description description of the new event
      * @param capacity the max number of people can participate in the new event
      * @param type the type of the event
      * @return return event id if create successfully, otherwise return null.
      */
-    String createEvent(String type, String name, Timestamp startTime, Timestamp endTime,
+    String createEvent(String type, String name, SortedSet<Timestamp[]> timeDuration,
                               String location, String description, int capacity) {
         numEvents = Math.max(numEvents, totalNumberOfEvents());
         String id = "E" + numEvents;
 
-        Event newEvent = new EventFactory().makeEvent(type, name, startTime, endTime, location,
+        Event newEvent = new EventFactory().makeEvent(type, name, timeDuration, location,
                 description, capacity, id);
         if (newEvent == null) return null;
 
         this.eventList.computeIfAbsent(type.toUpperCase(), k -> new HashMap<>());
         this.eventList.get(type.toUpperCase()).put(id, newEvent);
-        this.eventSchedule.computeIfAbsent(startTime, k -> new ArrayList<>());
-        this.eventSchedule.get(startTime).add(new String[]{id, name});
+        this.eventSchedule.computeIfAbsent(newEvent.getFirstTime(), k -> new ArrayList<>());
+        this.eventSchedule.get(newEvent.getFirstTime()).add(new String[]{newEvent.printEventDuration(), id, name});
         numEvents++;
         return id;
     }
@@ -266,24 +211,24 @@ public class EventManager implements Serializable {
     /**
      * Reschedules an event, change its start startTime to the given startTime.
      * @param eventID id of the event we want to change startTime
-     * @param startTime the new startTime we want the event start at
-     * @param endTime the new endTime of this event
+     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @return true if rescheduled successfully, else false
      */
-    boolean rescheduleEvent(String eventID, Timestamp startTime, Timestamp endTime) {
+    boolean rescheduleEvent(String eventID, SortedSet<Timestamp[]> timeDuration) {
         Event event = findEvent(eventID);
-        if (event != null && startTime != event.getStartTime()) {
+        if (event != null && timeDuration.first()[0] != event.getFirstTime()) {
             String name = event.getName();
             String[] idAndName = null;
-            for(String[] lst : eventSchedule.get(event.getStartTime())) {
+            Timestamp startTime = timeDuration.first()[0];
+            for(String[] lst : eventSchedule.get(event.getFirstTime())) {
                 if (lst[0].equals(eventID) && lst[1].equals(name)) {
                     idAndName = lst;
                 }
             }
-            eventSchedule.get(event.getStartTime()).remove(idAndName);
+            eventSchedule.get(event.getFirstTime()).remove(idAndName);
             eventSchedule.computeIfAbsent(startTime, k -> new ArrayList<>());
             eventSchedule.get(startTime).add(idAndName);
-            event.setTime(startTime, endTime);
+            event.setTime(timeDuration);
             return true;
         }
         return false;
@@ -297,7 +242,7 @@ public class EventManager implements Serializable {
     boolean cancelEvent(String eventID) {
         Event event = findEvent(eventID);
         if (event == null) return false;
-        List<String[]> events = eventSchedule.get(event.getStartTime());
+        List<String[]> events = eventSchedule.get(event.getFirstTime());
         if (events == null) return false;
 
         for (Map<String, Event> eventMap : eventList.values()) {
@@ -357,23 +302,27 @@ public class EventManager implements Serializable {
     }
 
     /**
-     * Gets the start time of a given event.
-     * @param eventId id of the target event
-     * @return start time of the event, or null if this event does not exist
+     * Gets event duration with given event Id
+     * @param eventId A String representation of event id
+     * @return An instance of SortedSet of this event duration
      */
-    public Timestamp getTime(String eventId){
+    public SortedSet<Timestamp[]> getEventDuration(String eventId) {
         Event event = findEvent(eventId);
-        return (event == null) ? null : event.getStartTime();
-    }
-
-    /**
-     * Gets the end time of a given event.
-     * @param eventId id of the target event
-     * @return end time of the event, or null if this event does not exist
-     */
-    public Timestamp getEndTime(String eventId) {
-        Event event = findEvent(eventId);
-        return (event == null) ? null : event.getEndTime();
+        if (event == null) {
+            return null;
+        }
+        SortedSet<Timestamp[]> sortedSet = new TreeSet<>((Comparator<Timestamp[]> & Serializable)
+                (Timestamp[] t1, Timestamp[] t2) -> {
+                    if (!t1[1].after(t2[0]))
+                        return -1;
+                    if (!t2[1].after(t1[0]))
+                        return 1;
+                    return 0;
+                }
+        );
+        Iterator<Timestamp[]> t = event.getDuration();
+        t.forEachRemaining(sortedSet::add);
+        return sortedSet;
     }
 
     /**
@@ -450,9 +399,9 @@ public class EventManager implements Serializable {
      * @param eventID id of the target event
      * @return true iff the event is not passed and is therefore valid
      */
-    public boolean isValidEvent(String eventID){
+    public boolean isValidEvent(String eventID) {
         Event event = findEvent(eventID);
-        return event != null && event.getStartTime().after(new Timestamp(new Date().getTime()));
+        return event != null && event.getFirstTime().after(new Timestamp(new Date().getTime()));
     }
 
     /**
@@ -514,5 +463,36 @@ public class EventManager implements Serializable {
             }
         }
     }
+
+    /**
+     * Gets all the valid event
+     * @param accountIsVip True iff given account is vip
+     * @param isVip True iff user what to access vip only event
+     * @return A map that maps valid event id to its duration
+     */
+    public Map<String, SortedSet<Timestamp[]>> getAllEventTime(boolean accountIsVip, boolean isVip) {
+        Timestamp currTime = new Timestamp(new Date().getTime());
+        SortedMap<Timestamp, List<String[]>> validMap = eventSchedule.tailMap(currTime);
+        Map<String, SortedSet<Timestamp[]>> o = new HashMap<>();
+        String eventId;
+        for (Timestamp key : validMap.keySet()) {
+            for(String[] value : validMap.get(key)) { // value[1] event id
+                eventId = value[1];
+                if (!isValidEvent(eventId)) {
+                    continue;
+                }
+                if (isVip) {
+                    if (isVIP(eventId)) {
+                        o.put(eventId, getEventDuration(eventId));
+                    }
+                }
+                else if (accountIsVip || isVIP(eventId)) {
+                    o.put(eventId, getEventDuration(eventId));
+                }
+            }
+        }
+        return o;
+    }
+
 }
 

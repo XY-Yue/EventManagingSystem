@@ -276,4 +276,27 @@ class EventPresenter extends MainPresenter {
         System.out.println("Choose features required for this event from the below list.\n" +
                 "If you do not see the desired feature, please add a room that has the desired feature.");
     }
+
+    /**
+     * Asks for event duration
+     * @param num The length of event duration
+     */
+    void askEventDuration(int num) {
+        System.out.println("Please enter y for add event duration: " + num + ", else r to stop");
+        super.getInput();
+    }
+
+    /**
+     * Prints the error message that time overlap
+     */
+    void printTimeOverlap() {
+        super.printErrorMessage("Time overlap");
+    }
+
+    /**
+     * Prints the error message that event time duration is empty
+     */
+    void printTimeDurationEmpty() {
+        super.printErrorMessage("Time duration cannot be empty");
+    }
 }
