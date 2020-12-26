@@ -10,7 +10,8 @@ import message.MessageSendingSystem;
 import message.MessagingManager;
 import room.RoomManager;
 import room.RoomSystem;
-import java.util.Scanner;
+
+import java.util.*;
 
 /**
  * This class is an controller class of organizer.
@@ -27,14 +28,11 @@ class OrganizerSystem extends UserSystem {
      * Creates an organizer system with the specified username and use case classes
      * @param username The username of the account logged in
      * @param messagingManager A copy of the MessagingManager use case
-     * @param eventManager A copy of the EventManager use case
-     * @param roomManager A copy of the RoomManager use case
      * @param accountManager A copy of the AccountManager use case
      */
     OrganizerSystem(String username, MessagingManager messagingManager,
-                    EventManager eventManager, RoomManager roomManager,
                     AccountManager accountManager) {
-        super(username, messagingManager, eventManager, roomManager, accountManager);
+        super(username, messagingManager, accountManager);
         this.organizerPresenter = new OrganizerPresenter();
     }
 
@@ -179,6 +177,37 @@ class OrganizerSystem extends UserSystem {
                 }
 
             }
+        }
+    }
+
+    @Override
+    public void run(){
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            List<String> conferences = gateway.readTextFile("ConferenceDataBase.txt");
+            if (conferences == null) conferences = new ArrayList<>();
+            conferences.add("Create a new conference");
+            organizerPresenter.printMenu(conferences, "log out");
+            String input = sc.nextLine();
+            if ("r".equalsIgnoreCase(input)) {
+                // this will result in logout
+                if (logOut(sc, organizerPresenter)) return;
+            } else if (input.matches("[\\d]+") && Integer.parseInt(input) < conferences.size()) {
+                int option = Integer.parseInt(input);
+                String conference = conferences.get(option);
+                if (option == conferences.size() - 1) { // organizer requested to make a new conference
+                    String newConference = new LocalConferenceInitSystem<>().createConference(sc, conferences);
+
+                    if (newConference == null) continue;
+                    else {
+                        conference = newConference;
+                        gateway.writeToText("ConferenceDataBase.txt", Collections.singletonList(conference));
+                    }
+                }
+                // Read the corresponding Eve/Room Manager
+                initConference(conference);
+            }else organizerPresenter.printInvalidInput();
         }
     }
 }

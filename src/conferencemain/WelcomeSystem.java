@@ -22,22 +22,15 @@ import java.util.Scanner;
 class WelcomeSystem {
     // Storing all 4 use cases to avoid duplicate long parameters for all methods in this class
     private final AccountManager accountManager;
-    private final EventManager eventManager;
-    private final RoomManager roomManager;
     private final MessagingManager messagingManager;
 
     /**
      * Creates an welcome system with specific account manager and message, event, room, and account systems.
      * @param accountManager A copy of the AccountManager use case to be stored
-     * @param eventManager A copy of the EventManager use case to be stored
-     * @param roomManager A copy of the RoomManager use case to be stored
      * @param messagingManager A copy of the MessagingManager use case to be stored
      */
-    WelcomeSystem(AccountManager accountManager, EventManager eventManager,
-                  RoomManager roomManager, MessagingManager messagingManager){
+    WelcomeSystem(AccountManager accountManager, MessagingManager messagingManager){
         this.accountManager = accountManager;
-        this.eventManager = eventManager;
-        this.roomManager = roomManager;
         this.messagingManager = messagingManager;
     }
 
@@ -75,11 +68,11 @@ class WelcomeSystem {
                     for (;;) {
                         switch(input) {
                             case "0":
-                                wp.printActionMessage("Save the data");
+                                wp.printActionMessage("Save the account and message data");
                                 wp.printActionMessage("End Program");
                                 return true;
                             case "1":
-                                wp.printActionMessage("Un-save the data");
+                                wp.printActionMessage("Un-save the account and message data");
                                 wp.printActionMessage("End Program");
                                 return false;
                             case "r":
@@ -105,8 +98,7 @@ class WelcomeSystem {
     // helper for login() and register()
     private void createUserSys(String username, String type){
         new UserSystemFactory().makeUserSys(type, username,
-                accountManager, eventManager, roomManager,
-                messagingManager).selectOption();
+                accountManager, messagingManager).run();
     }
 
     // helper for start()

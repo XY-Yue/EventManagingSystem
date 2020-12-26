@@ -8,10 +8,10 @@ import java.io.*;
  * @author Group0694
  * @version 2.0.0
  */
-public class DataSaver<T> {
+public class DataSaver<T> extends MainGateway {
 
     @SuppressWarnings("FieldMayBeFinal")
-    private MainPresenter wp = new MainPresenter();
+    private MainPresenter mainPresenter = new MainPresenter();
 
     /** Reads from a file that contains the information of a use case class
      * @param path The location and name of the file reading from
@@ -32,7 +32,7 @@ public class DataSaver<T> {
             input.close();
             return em;
         } catch (IOException ex) {
-            wp.printErrorMessage("fail to read from " + path);
+            mainPresenter.printErrorMessage("fail to read from " + path);
             return null;
         }
     }
@@ -52,16 +52,8 @@ public class DataSaver<T> {
             output.writeObject(var);
             output.close();
         } catch (IOException ex) {
-            wp.printErrorMessage("fail to save to " + filePath);
+            mainPresenter.printErrorMessage("fail to save to " + filePath);
         }
     }
 
-    /** Gives the given file name a proper file path that the file should be stored
-     * @param path The name of the required file
-     * @return A String representing the correct location of the data
-     */
-    public String getSrcPath(String path) {
-        // Read and save everything outside project path, if change latter than we just need to change this method
-        return "src" + File.separator + "data" + File.separator + path;
-    }
 }

@@ -17,18 +17,12 @@ public class InitializingSystem{
     // Storing all 4 managers to avoid long parameters for most methods in this class, and convenience
     // Knowing that this class only responsible for creating these use cases and sending them to gateway
     private AccountManager accountManager;
-    private EventManager eventManager;
-    private RoomManager roomManager;
     private MessagingManager messagingManager;
 
     /* helper for run() */
     private boolean getData(){
         try {
             this.readMessage();
-
-            this.readEvent();
-
-            this.readRoom();
 
             this.readAccount();
 
@@ -40,12 +34,6 @@ public class InitializingSystem{
 
     /* helper for run() */
     private void saveData(){
-        DataSaver<EventManager> eventSaver = new DataSaver<>();
-        eventSaver.saveToFile(eventSaver.getSrcPath("EventDataBase.ser"), eventManager);
-
-        DataSaver<RoomManager> roomSaver = new DataSaver<>();
-        roomSaver.saveToFile(roomSaver.getSrcPath("RoomDataBase.ser"), roomManager);
-
         DataSaver<MessagingManager> messageSaver = new DataSaver<>();
         messageSaver.saveToFile(messageSaver.getSrcPath("MessageDataBase.ser"), messagingManager);
 
@@ -59,8 +47,7 @@ public class InitializingSystem{
      */
     public void run(){
         if (this.getData()) {
-            WelcomeSystem welcome = new WelcomeSystem(accountManager, eventManager, roomManager,
-                    messagingManager);
+            WelcomeSystem welcome = new WelcomeSystem(accountManager, messagingManager);
             if (welcome.start()) {
                 this.saveData();
             }
@@ -84,15 +71,4 @@ public class InitializingSystem{
         if (this.messagingManager == null) this.messagingManager = new MessagingManager();
     }
 
-    private void readRoom() throws ClassNotFoundException {
-        DataSaver<RoomManager> readRoom = new DataSaver<>();
-        this.roomManager = readRoom.readFromFile(readRoom.getSrcPath("RoomDataBase.ser"));
-        if (this.roomManager == null) this.roomManager = new RoomManager();
-    }
-
-    private void readEvent() throws ClassNotFoundException {
-        DataSaver<EventManager> readEvent = new DataSaver<>();
-        this.eventManager = readEvent.readFromFile(readEvent.getSrcPath("EventDataBase.ser"));
-        if (this.eventManager == null) this.eventManager = new EventManager();
-    }
 }

@@ -24,21 +24,19 @@ public class UserSystemFactory {
      * @param type the type of the user logged in
      * @param username The username of the account logged in
      * @param messagingManager A copy of the MessagingManager use case
-     * @param eventManager A copy of the EventManager use case
-     * @param roomManager A copy of the RoomManager use case
      * @param accountManager A copy of the AccountManager use case
      */
-    public UserSystem makeUserSys(String type, String username, AccountManager accountManager, EventManager eventManager,
-                                  RoomManager roomManager, MessagingManager messagingManager){
+    public UserSystem makeUserSys(String type, String username, AccountManager accountManager,
+                                  MessagingManager messagingManager){
         switch (type){
             case "Attendee":
-                return new AttendeeSystem(username, messagingManager, eventManager, roomManager, accountManager);
+                return new AttendeeSystem(username, messagingManager, accountManager);
             case "Organizer":
-                return new OrganizerSystem(username, messagingManager, eventManager, roomManager, accountManager);
+                return new OrganizerSystem(username, messagingManager, accountManager);
             case "Speaker":
-                return new SpeakerSystem(username, messagingManager, eventManager, roomManager, accountManager);
+                return new SpeakerSystem(username, messagingManager, accountManager);
             case "VIP":
-                return new VIPSystem(username, messagingManager, eventManager, roomManager, accountManager);
+                return new VIPSystem(username, messagingManager, accountManager);
             default: return null;
         }
     }

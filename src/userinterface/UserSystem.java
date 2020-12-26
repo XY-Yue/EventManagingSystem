@@ -3,6 +3,8 @@ package userinterface;
 import account.AccountEventSystem;
 import account.AccountManager;
 import account.AccountSystem;
+import data.ConferenceInfoGateway;
+import data.DataSaver;
 import event.EventManager;
 import event.EventSystem;
 import message.MessageSearchingSystem;
@@ -24,9 +26,11 @@ import java.util.Scanner;
 public abstract class UserSystem {
     protected String username;
     protected final AccountManager accountManager;
-    protected final EventManager eventManager;
-    protected final RoomManager roomManager;
+    protected EventManager eventManager;
+    protected RoomManager roomManager;
     protected final MessagingManager messagingManager;
+    protected ConferenceInfoGateway gateway = new ConferenceInfoGateway();
+    private final UserPresenter presenter;
 
     /**
      * Stores available status for messages
@@ -73,31 +77,78 @@ public abstract class UserSystem {
      * and accountSystem
      * @param username A string represents the username of this user account
      * @param messagingManager A copy of the MessagingManager use case
-     * @param eventManager A copy of the EventManager use case
-     * @param roomManager A copy of the RoomManager use case
      * @param accountManager A copy of the AccountManager use case
      */
     UserSystem(String username, MessagingManager messagingManager,
-               EventManager eventManager, RoomManager roomManager,
                AccountManager accountManager){
         this.username = username;
         this.messagingManager = messagingManager;
-        this.eventManager = eventManager;
-        this.roomManager = roomManager;
         this.accountManager = accountManager;
 
+        presenter = new UserPresenter();
+    }
+
+    public void run(){
+        Scanner sc = new Scanner(System.in);
+        List<String> conferences = gateway.readTextFile("ConferenceDataBase.txt");
+        if (conferences == null) conferences = new ArrayList<>();
+        if (conferences.size() == 0) {
+            presenter.printErrorMessage("Sorry, there is no conference available");
+            return;
+        }
+        while (true) {
+            presenter.printMenu(conferences, "log out");
+            String input = sc.nextLine();
+            if ("r".equalsIgnoreCase(input)) {
+                // this will result in logout
+                if (logOut(sc, presenter)) return;
+            } else if (input.matches("[\\d]+") && Integer.parseInt(input) < conferences.size()) {
+                String conference = conferences.get(Integer.parseInt(input));
+                // Read the corresponding Eve/Room Manager
+                initConference(conference);
+            }else presenter.printInvalidInput();
+        }
+    }
+
+    protected boolean logOut(Scanner sc, UserPresenter up) {
+        up.logOut();
+        switch (sc.nextLine()) {
+            case "y":
+                up.logOutSuccess();
+                return true;
+            case "n":
+                break;
+            default:
+                up.printInvalidInput();
+        }
+        return false;
+    }
+
+    protected void initConference(String conference) {
+        LocalConferenceInitSystem<EventManager> initEvent = new LocalConferenceInitSystem<>();
+        this.eventManager = initEvent.getManager(conference, "EventDataBase.ser");
+        if (eventManager == null) eventManager = new EventManager();
+
+        LocalConferenceInitSystem<RoomManager> initRoom = new LocalConferenceInitSystem<>();
+        this.roomManager = initRoom.getManager(conference, "RoomDataBase.ser");
+        if (roomManager == null) roomManager = new RoomManager();
+
+        selectOption();
+
+        // TODO: (maybe) add option for user to save data or not
+        initEvent.saveManager(conference, "EventDataBase.ser", eventManager);
+        initRoom.saveManager(conference, "RoomDataBase.ser", roomManager);
     }
 
     /**
      * Provides five options and a logout option for a user to choose
      * Allows the user to decide message, event or account sub-menus
      */
-    public void selectOption(){
+    protected void selectOption(){
         Scanner sc = new Scanner(System.in);
-        UserPresenter up = new UserPresenter();
         MessageSearchingSystem messageSearchingSystem = new MessageSearchingSystem(messagingManager, accountManager);
         while (true) {
-            up.optionMenu(this.username);
+            presenter.optionMenu(this.username);
             switch (sc.nextLine()){
                 case "0":
                     this.accountOption();
@@ -116,19 +167,19 @@ public abstract class UserSystem {
                     break;
                 case "r":
                     // this will result in logout
-                    up.logOut();
+                    presenter.logOut();
                     switch (sc.nextLine()) {
                         case "y":
-                            up.logOutSuccess();
+                            presenter.logOutSuccess();
                             return;
                         case "n":
                             break;
                         default:
-                            up.printInvalidInput();
+                            presenter.printInvalidInput();
                     }
                     break;
                 default:
-                    up.printInvalidInput();
+                    presenter.printInvalidInput();
             }
         }
     }

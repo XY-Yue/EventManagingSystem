@@ -24,14 +24,11 @@ class SpeakerSystem extends UserSystem {
      * Creates an speaker system with the specified username and use case classes
      * @param username The username of the account logged in
      * @param messagingManager A copy of the MessagingManager use case
-     * @param eventManager A copy of the EventManager use case
-     * @param roomManager A copy of the RoomManager use case
      * @param accountManager A copy of the AccountManager use case
      */
     SpeakerSystem(String username, MessagingManager messagingManager,
-                  EventManager eventManager, RoomManager roomManager,
                   AccountManager accountManager) {
-        super(username, messagingManager, eventManager, roomManager, accountManager);
+        super(username, messagingManager, accountManager);
         speakerPresenter = new SpeakerPresenter();
     }
 
