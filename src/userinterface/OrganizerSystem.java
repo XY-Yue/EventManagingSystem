@@ -3,12 +3,10 @@ package userinterface;
 import account.AccountEventSystem;
 import account.AccountManager;
 import account.AccountSystem;
-import event.EventManager;
 import event.EventSchedulerSystem;
 import message.MessageSearchingSystem;
 import message.MessageSendingSystem;
 import message.MessagingManager;
-import room.RoomManager;
 import room.RoomSystem;
 
 import java.util.*;
@@ -180,6 +178,9 @@ class OrganizerSystem extends UserSystem {
         }
     }
 
+    /**
+     * Runs the options for user to choose a conference with a additional choice of making a new conference
+     */
     @Override
     public void run(){
         Scanner sc = new Scanner(System.in);
@@ -192,7 +193,7 @@ class OrganizerSystem extends UserSystem {
             String input = sc.nextLine();
             if ("r".equalsIgnoreCase(input)) {
                 // this will result in logout
-                if (logOut(sc, organizerPresenter)) return;
+                if (logOut(sc)) return;
             } else if (input.matches("[\\d]+") && Integer.parseInt(input) < conferences.size()) {
                 int option = Integer.parseInt(input);
                 String conference = conferences.get(option);

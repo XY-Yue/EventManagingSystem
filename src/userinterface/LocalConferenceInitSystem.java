@@ -8,6 +8,12 @@ import java.util.Scanner;
 
 public class LocalConferenceInitSystem<T> {
 
+    /**
+     * Gets the required use case from gateway
+     * @param conference The conference the use case belongs to
+     * @param filePath the path of the .ser file
+     * @return the instance of the required use case class
+     */
     T getManager(String conference, String filePath){
         DataSaver<T> managerDataSaver = new DataSaver<>();
         try {
@@ -18,6 +24,12 @@ public class LocalConferenceInitSystem<T> {
         }
     }
 
+    /**
+     * Asks input for a new conference, checks if it is valid
+     * @param sc A instance of scanner
+     * @param curConferences all current existing conferences
+     * @return the name of the new conference
+     */
     String createConference(Scanner sc, List<String> curConferences){
         MainPresenter presenter = new MainPresenter();
         while (true){
@@ -41,6 +53,12 @@ public class LocalConferenceInitSystem<T> {
         }
     }
 
+    /**
+     * Saves the given manager into .ser file through gateway
+     * @param conference the name of the conference this use case belonging to
+     * @param filePath the path of the target file
+     * @param manager the use case class requiring to be stored
+     */
     void saveManager(String conference, String filePath, T manager){
         DataSaver<T> managerDataSaver = new DataSaver<>();
         managerDataSaver.saveToFile(managerDataSaver.getSrcPath(conference + filePath), manager);

@@ -4,7 +4,6 @@ import account.AccountEventSystem;
 import account.AccountManager;
 import account.AccountSystem;
 import data.ConferenceInfoGateway;
-import data.DataSaver;
 import event.EventManager;
 import event.EventSystem;
 import message.MessageSearchingSystem;
@@ -88,6 +87,9 @@ public abstract class UserSystem {
         presenter = new UserPresenter();
     }
 
+    /**
+     * Runs the menu for selecting conferences
+     */
     public void run(){
         Scanner sc = new Scanner(System.in);
         List<String> conferences = gateway.readTextFile("ConferenceDataBase.txt");
@@ -101,7 +103,7 @@ public abstract class UserSystem {
             String input = sc.nextLine();
             if ("r".equalsIgnoreCase(input)) {
                 // this will result in logout
-                if (logOut(sc, presenter)) return;
+                if (logOut(sc)) return;
             } else if (input.matches("[\\d]+") && Integer.parseInt(input) < conferences.size()) {
                 String conference = conferences.get(Integer.parseInt(input));
                 // Read the corresponding Eve/Room Manager
@@ -110,20 +112,29 @@ public abstract class UserSystem {
         }
     }
 
-    protected boolean logOut(Scanner sc, UserPresenter up) {
-        up.logOut();
+    /**
+     * Asks user input to log out or not
+     * @param sc a copy of scanner
+     * @return true iff user selects to logout
+     */
+    protected boolean logOut(Scanner sc) {
+        presenter.logOut();
         switch (sc.nextLine()) {
             case "y":
-                up.logOutSuccess();
+                presenter.logOutSuccess();
                 return true;
             case "n":
                 break;
             default:
-                up.printInvalidInput();
+                presenter.printInvalidInput();
         }
         return false;
     }
 
+    /**
+     * Initialize event and room manager based on user's conference choice
+     * @param conference User's chosen conference
+     */
     protected void initConference(String conference) {
         LocalConferenceInitSystem<EventManager> initEvent = new LocalConferenceInitSystem<>();
         this.eventManager = initEvent.getManager(conference, "EventDataBase.ser");
