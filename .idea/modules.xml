@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/EventManagingSystem.iml" filepath="$PROJECT_DIR$/.idea/EventManagingSystem.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/AndroidPerformanceManager.iml" filepath="$PROJECT_DIR$/.idea/AndroidPerformanceManager.iml" group="AndroidPerformanceManager" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/app.iml" group="AndroidPerformanceManager/app" />
     </modules>
   </component>
 </project>

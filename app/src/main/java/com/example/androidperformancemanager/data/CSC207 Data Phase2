@@ -1,0 +1,228 @@
+
+CSC207 Data
+
+User Account Information:
+
+Type: Organizer
+Username: username1
+Password: _Password1
+
+Type: Organizer
+Username: username2
+Password: _Password2
+
+Type: Speaker
+Username: username3
+Password: _Password3
+
+Type: Speaker
+Username: username4
+Password: _Password4
+
+Type: Speaker
+Username: username5
+Password: _Password5
+
+Type: Attendee
+Username: username6
+Password: _Password6
+
+Type: Attendee
+Username: username7
+Password: _Password7
+
+Type: Attendee
+Username: username8
+Password: _Password8
+
+Type: Attendee
+Username: username9
+Password: _Password9
+
+Type: VIP
+Username: username10
+Password: _Password10
+
+Room Info:
+
+Room: BA1130
+Time: 9(9am) to 17(5pm)
+Capacity: 100
+Features: Projector, Row of Chairs
+
+Room: BA1200
+Time: 24 hours
+Capacity: 50
+Features: Projector, Table
+
+Room: MP202
+Time: 7(7am) to 12(12pm), 15(3pm) to 24(12am)
+Capacity: 196
+Features: Projector, Table, Row of Chair, Computers
+
+
+Event Info:
+
+(Expired)
+Type: Talk
+Name: CSC207 Phase 0
+ID: E0
+Start Time: 2020-12-20 15:25
+End Time: 2020-12-20 16:00
+Location: BA1130
+Description: We are going to learn about SOLID
+Features: Projector
+Capacity: 2
+Speaker: username3
+Attendees: [username6, username7]
+
+Type: Party
+Name: Party Time
+ID: E1
+Start Time: 2020-12-25 15:00
+End Time: 2020-12-25 23:00
+Location: MP202
+Description: Let's have fun
+Features: Table, Computers
+Capacity: 2
+Speaker:
+Attendees: [username6]
+
+VIP only
+Type: Party
+Name: VIP party
+ID: E2
+Start Time: 2020-12-25 0:00
+End Time: 2020-12-26 0:00
+Location: BA1200
+Description: VIP party Only
+Features:
+Capacity: 5
+Speaker:
+Attendees: [username1, username2, username3, username10]
+
+VIP only
+Type: Panel Discussion
+Name: CSC207 Phase 2
+ID: E3
+Start Time: 2020-12-28 9:00
+End Time: 2020-12-28 15:00
+Location: BA1130
+Description: Phase 2 is done!!!!
+Features: Row of chairs
+Capacity: 4
+Speaker: username3, username4
+Attendees: [username5, username10]
+
+Type: Panel Discussion
+Name: CSC207 Phase 2
+ID: E4
+Start Time: 2020-12-29 9:00
+End Time: 2020-12-29 15:00
+Location: BA1130
+Description: Phase 2 is done!!!!
+Features: Row of chairs
+Capacity: 2
+Speaker: username3, username4, username5
+Attendees: [username7, username6]
+
+
+Message Info:
+
+Username: username1
+Message sent:
+1.  Type: Word Message
+    Id: M0
+    At the time: December 17, 2020 1:47:28 ES
+    Sender: username1
+    Receiver: [username3, username4, username5]
+    Subject: “Welcome Speaker”
+    Content: “Hello World”
+2.  Type: Word Message
+    Id: M1
+    At the time: December 17, 2020 1:47:41 ES
+    Sender: username1
+    Receiver: [username6, username7, username8, username9]
+    Subject: “Welcome Attendee”
+    Content: “Hello World”
+
+Message received:
+1.  Type: Word Message
+    Id: M2
+    At the time: December 17, 2020 1:48:27 E
+    Sender: username9
+    Subject: “Hello World”
+    Content: “Hello World”
+
+Username: username3
+Message received:
+1.  Type: Word Message
+    Id: M0
+    Id: M0
+    At the time: December 17, 2020 1:47:28 ES
+    Sender: username1
+    Subject: “Welcome Speaker”
+    Content: “Hello World”
+
+Username: username4
+Message received:
+1.  Type: Word Message
+    Id: M0
+    At the time: December 17, 2020 1:47:28 ES
+    Sender: username1
+    Subject: “Welcome Speaker”
+    Content: “Hello World”
+
+Username: username5
+Message received:
+1.  Type: Word Message
+    Id: M0
+    At the time: December 17, 2020 1:47:28 ES
+    Sender: username1
+    Subject: “Welcome Speaker”
+    Content: “Hello World”
+
+Username: username6
+Message received:
+1.  Type: Word Message
+    Id: M1
+    At the time: December 17, 2020 1:47:41 ES
+    Sender: username1
+    Subject: “Welcome Attendee”
+    Content: “Hello World”
+
+Username: username7
+Message received:
+1.  Type: Word Message
+    Id: M1
+    At the time: December 17, 2020 1:47:41 ES
+    Sender: username1
+    Subject: “Welcome Speaker”
+    Content: “Hello World”
+
+Username: username8
+Message received:
+1.  Type: Word Message
+    Id: M1
+    At the time: December 17, 2020 1:47:41 ES
+    Sender: username1
+    Subject: “Welcome Speaker”
+    Content: “Hello World”
+
+Username: username9
+Message sent:
+1.  Type: Word Message
+    Id: M2
+    At the time: December 17, 2020 1:48:27 E
+    Sender: username9
+    Receiver: [username1]
+    Subject: “Hello World”
+    Content: “Hello World”
+
+Message received:
+1.  Type: Word Message
+    Id: M1
+    At the time: December 17, 2020 1:47:41 ES
+    Sender: username1
+    Subject: “Welcome Speaker”
+    Content: “Hello World”

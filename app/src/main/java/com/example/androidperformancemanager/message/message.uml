@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>message</OriginalElement>
+  <nodes>
+    <node x="270.99999999999994" y="647.5">message.MessageNewestToOldest</node>
+    <node x="622.5" y="0.0">message.Message</node>
+    <node x="406.99999999999994" y="254.5">message.MessageSorter</node>
+    <node x="0.0" y="647.5">message.MessageOldestToNewest</node>
+    <node x="678.0" y="231.0">message.WordMessage</node>
+    <node x="1349.3173363095239" y="406.0">message.MessagePresenter</node>
+    <node x="1058.8238095238094" y="1091.5">message.MessageSendingSystem</node>
+    <node x="685.7040178571428" y="590.0">message.MessagingManager</node>
+    <node x="1516.3121279761904" y="1137.5">message.MessageUpdatingSystem</node>
+    <node x="295.2828125000001" y="1057.0">message.MessageSearchingSystem</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="message.MessageNewestToOldest" target="message.MessageSorter">
+      <point x="62.75" y="-39.0" />
+      <point x="459.24999999999994" y="381.0" />
+      <point x="482.2999999999999" y="381.0" />
+      <point x="-50.200000000000045" y="39.0" />
+    </edge>
+    <edge source="message.WordMessage" target="message.Message">
+      <point x="113.0" y="-62.5" />
+      <point x="1017.0" y="211.0" />
+      <point x="839.1428571428569" y="211.0" />
+      <point x="48.142857142857" y="85.5" />
+    </edge>
+    <edge source="message.MessageOldestToNewest" target="message.MessageSorter">
+      <point x="62.75" y="-39.0" />
+      <point x="188.25" y="381.0" />
+      <point x="432.09999999999985" y="381.0" />
+      <point x="-100.40000000000009" y="39.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.4073811213626686" x="964.5" y="694.5" />
+  <SelectedNodes>
+    <node>message.MessageOldestToNewest</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
