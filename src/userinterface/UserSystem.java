@@ -177,18 +177,7 @@ public abstract class UserSystem {
                     this.eventAccessOption();
                     break;
                 case "r":
-                    // this will result in logout
-                    presenter.logOut();
-                    switch (sc.nextLine()) {
-                        case "y":
-                            presenter.logOutSuccess();
-                            return;
-                        case "n":
-                            break;
-                        default:
-                            presenter.printInvalidInput();
-                    }
-                    break;
+                    return;
                 default:
                     presenter.printInvalidInput();
             }

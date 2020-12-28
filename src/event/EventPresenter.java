@@ -24,7 +24,9 @@ class EventPresenter extends MainPresenter {
     void printEventList(List<String[]> expired, List<String[]> curr) {
         System.out.println("Expired Events: ");
         for(String[] s : expired) {
-            System.out.println("Starting Time: " + s[0] + ", End Time: " + s[1] + ", Event Id: " + s[2] + ", Event Name: " + s[3]);
+            System.out.println("Event ID: " + s[1] + ", Event Name: " + s[2]);
+            System.out.println("Event Duration: ");
+            System.out.println(s[0]);
         }
         if (expired.size() == 0) {
             System.out.println("None");
@@ -32,7 +34,9 @@ class EventPresenter extends MainPresenter {
         System.out.println();
         System.out.println("Upcoming Events: ");
         for(String[] s : curr) {
-            System.out.println("Starting Time: " + s[0] + ", End Time: " + s[1] + ", Event Id: " + s[2] + ", Event Name: " + s[3]);
+            System.out.println("Event ID: " + s[1] + ", Event Name: " + s[2]);
+            System.out.println("Event Duration: ");
+            System.out.println(s[0]);
         }
         if (curr.size() == 0) {
             System.out.println("None");
@@ -60,7 +64,9 @@ class EventPresenter extends MainPresenter {
                 if (!key) {
                     key = true;
                 }
-                System.out.println("Event Id: " + s[0] + ", Event Name: " + s[1]);
+                System.out.println("Event Id: " + s[1] + ", Event Name: " + s[2]);
+                System.out.println("Event Duration: ");
+                System.out.println(s[0]);
             }
         }
         if (!key) {
