@@ -56,19 +56,6 @@ public class EventManager implements Serializable {
      */
     public List<String> allEventTypes(){ return Arrays.asList(eventType); }
 
-    private String getTime(Timestamp time) {
-        Date date = new Date(time.getTime());
-        return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG).format(date);
-    }
-
-    private String[] getEventScheduleValue(Timestamp t, String[] value) {
-        Event event = findEvent(value[0]);
-        if (event == null) {
-            return new String[]{getTime(t), "", value[0], value[1]};
-        }
-        return new String[]{getTime(t), event.printEventDuration(), value[0], value[1]};
-    }
-
     /**
      * Gets Schedule of all events
      * @return A list of arrays where in the format [time, id, event name]
@@ -96,7 +83,8 @@ public class EventManager implements Serializable {
         for (String[] item : value) {
             Event event = this.findEvent(item[0]);
             if (!vip || event != null && event.isVIP())// (not VIP only) or (VIP only and check if event is VIP)
-                list.add(getEventScheduleValue(t, item));
+                list.add(item);
+                // list.add(getEventScheduleValue(t, item));
         }
     }
 

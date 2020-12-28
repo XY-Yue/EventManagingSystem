@@ -23,7 +23,7 @@ public class UserPresenter extends MainPresenter {
         System.out.println("Welcome: " + username);
         List<String> lst = Arrays.asList("manage my account", "check my inbox", "access or send messages",
                 "view event schedule", "access my conference system");
-        super.printMenu(lst, "log out");
+        super.printMenu(lst, "return to previous page");
     }
 
     /**
