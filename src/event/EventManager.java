@@ -68,9 +68,9 @@ public class EventManager implements Serializable {
         for (Timestamp t : eventSchedule.keySet()) {
             List<String[]> value = eventSchedule.get(t);
             if (currTime.before(t)) {
-                addEventAtTimeToList(vip, curr, t, value);
+                addEventAtTimeToList(vip, curr, value);
             } else {
-                addEventAtTimeToList(vip, expired, t, value);
+                addEventAtTimeToList(vip, expired, value);
             }
         }
         Map<String, List<String[]>> m = new HashMap<>();
@@ -79,9 +79,9 @@ public class EventManager implements Serializable {
         return m;
     }
 
-    private void addEventAtTimeToList(boolean vip, List<String[]> list, Timestamp t, List<String[]> value) {
+    private void addEventAtTimeToList(boolean vip, List<String[]> list, List<String[]> value) {
         for (String[] item : value) {
-            Event event = this.findEvent(item[0]);
+            Event event = this.findEvent(item[1]);
             if (!vip || event != null && event.isVIP())// (not VIP only) or (VIP only and check if event is VIP)
                 list.add(item);
                 // list.add(getEventScheduleValue(t, item));
@@ -200,26 +200,23 @@ public class EventManager implements Serializable {
      * Reschedules an event, change its start startTime to the given startTime.
      * @param eventID id of the event we want to change startTime
      * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @return true if rescheduled successfully, else false
      */
-    boolean rescheduleEvent(String eventID, SortedSet<Timestamp[]> timeDuration) {
+    void rescheduleEvent(String eventID, SortedSet<Timestamp[]> timeDuration) {
         Event event = findEvent(eventID);
-        if (event != null && timeDuration.first()[0] != event.getFirstTime()) {
+        if (event != null) {  //&& timeDuration.first()[0] != event.getFirstTime()
             String name = event.getName();
-            String[] idAndName = null;
             Timestamp startTime = timeDuration.first()[0];
             for(String[] lst : eventSchedule.get(event.getFirstTime())) {
-                if (lst[0].equals(eventID) && lst[1].equals(name)) {
-                    idAndName = lst;
+                // lst[0] is the time duration
+                if (lst[1].equals(eventID) && lst[2].equals(name)) {
+                    eventSchedule.get(event.getFirstTime()).remove(lst);
+                    break;
                 }
             }
-            eventSchedule.get(event.getFirstTime()).remove(idAndName);
-            eventSchedule.computeIfAbsent(startTime, k -> new ArrayList<>());
-            eventSchedule.get(startTime).add(idAndName);
             event.setTime(timeDuration);
-            return true;
+            eventSchedule.computeIfAbsent(startTime, k -> new ArrayList<>());
+            eventSchedule.get(startTime).add(new String[]{event.printEventDuration(), eventID, name});
         }
-        return false;
     }
 
     /**
@@ -238,7 +235,7 @@ public class EventManager implements Serializable {
         }
         int index = -1;
         for (int i=0;i<events.size();i++) {
-            if (events.get(i) != null && eventID.equalsIgnoreCase(events.get(i)[0])) {
+            if (events.get(i) != null && eventID.equalsIgnoreCase(events.get(i)[1])) {
                 index = i;
                 break;
             }

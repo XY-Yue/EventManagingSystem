@@ -374,12 +374,7 @@ public class EventSchedulerSystem {
         while (lst.hasNext()) {
             requiredFeaturesList.add(lst.next());
         }
-        SortedSet<Timestamp[]> timeDuration = inputDurationTime(c);
-        if (timeDuration.size() == 0) {
-            presenter.printTimeDurationEmpty();
-            presenter.rescheduleMessage(false);
-            return;
-        }
+        SortedSet<Timestamp[]> timeDuration = eventManager.getEventDuration(eventID);
         String room = this.inputRoom(c, timeDuration, requiredFeaturesList,
                 eventManager.getCapacity(eventID));
         if (room == null) {
