@@ -2,12 +2,11 @@ package event;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.util.*;
 
 
 /**
- * An use case class of event.
+ * An use case class of event. Implements Serializable.
  * Stores all event in a map with event id of event map to the corresponding event. Also a sorted map with
  * time map to a list of toString of events start at that time.
  * Also stores total number of events.
@@ -109,14 +108,14 @@ public class EventManager implements Serializable {
      * Assumes that it has been checked to make sure the capacity does not exceed the room capacity.
      * @param name name of the new event
      * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @param location room name of the new event held in
+     * @param location An instance of EventObserver, represents the new event held in
      * @param description description of the new event
      * @param capacity the max number of people can participate in the new event
      * @param type the type of the event
      * @return return event id if create successfully, otherwise return null.
      */
     String createEvent(String type, String name, SortedSet<Timestamp[]> timeDuration,
-                              String location, String description, int capacity) {
+                              EventObserver location, String description, int capacity) {
         numEvents = Math.max(numEvents, totalNumberOfEvents());
         String id = "E" + numEvents;
 
@@ -185,12 +184,13 @@ public class EventManager implements Serializable {
     /**
      * Schedules a speaker into a given event.
      * @param eventID id of the event we want to schedule the speaker to
-     * @param username the user we want to schedule as the speaker of the event
+     * @param username A collection of EventWithSpecObserver, represents the user we want to schedule as the speaker
+     *                 of the event
      * @return true iff scheduled successfully
      */
-    boolean scheduleSpeaker(String eventID, List<String> username) {
+    boolean scheduleSpeaker(String eventID, List<EventWithSpecObserver> username) {
         Event event = findEvent(eventID);
-        if (event != null){
+        if (event != null) {
             return event.changeHost(username);
         }
         return false;
@@ -213,6 +213,7 @@ public class EventManager implements Serializable {
                     break;
                 }
             }
+            // Notify room
             event.setTime(timeDuration);
             eventSchedule.computeIfAbsent(startTime, k -> new ArrayList<>());
             eventSchedule.get(startTime).add(new String[]{event.printEventDuration(), eventID, name});
@@ -221,7 +222,7 @@ public class EventManager implements Serializable {
 
     /**
      * Cancels an event.
-     * @param eventID id of the event we want to cancel
+     * @param eventID id of the event we want to cancel. It also notifies all the observers.
      * @return true iff rescheduled successfully
      */
     boolean cancelEvent(String eventID) {
@@ -229,7 +230,9 @@ public class EventManager implements Serializable {
         if (event == null) return false;
         List<String[]> events = eventSchedule.get(event.getFirstTime());
         if (events == null) return false;
-
+        // Notify all observers remove
+        event.notifyRoomRemove();
+        event.notifyHostRemove();
         for (Map<String, Event> eventMap : eventList.values()) {
             eventMap.remove(eventID);
         }
@@ -367,14 +370,14 @@ public class EventManager implements Serializable {
     /**
      * Sets a new location for a event
      * @param eventID id of the target event
-     * @param roomName The new location for a event, assumes it is valid
+     * @param room An instance of EventObserver, represents the new location for a event, assumes it is valid
      * @return true iff the event exists
      */
-    boolean changeRoom(String eventID, String roomName){
+    boolean changeRoom(String eventID, EventObserver room){
         Event event = findEvent(eventID);
         if (event == null) return false;
         else {
-            event.setLocation(roomName);
+            event.setLocation(room);
             return true;
         }
     }
@@ -479,5 +482,15 @@ public class EventManager implements Serializable {
         return o;
     }
 
+    /**
+     * Notifies the host observer when adding an event to its schedule.
+     * @param eventId A String representation of the event id
+     */
+    protected void updateHostAdd(String eventId) {
+        Event event = findEvent(eventId);
+        if (event != null) {
+            event.notifyHostAdd();
+        }
+    }
 }
 

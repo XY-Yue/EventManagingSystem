@@ -82,4 +82,14 @@ public class VIPAttendee extends Account {
     protected boolean isVIP() {
         return true;
     }
+
+    /**
+     * Checks if the given event id is in this account's specialist
+     * @param eventId A String representation of event id
+     * @return True iff event id is in this account's specialist
+     */
+    @Override
+    protected boolean isInSpecialist(String eventId) {
+        return vipEvents.contains(eventId);
+    }
 }

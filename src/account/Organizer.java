@@ -83,4 +83,14 @@ public class Organizer extends Account {
     protected boolean isVIP() {
         return isVIP;
     }
+
+    /**
+     * Checks if the given id is in this account's specialist.
+     * @param eventId A String representation of event id.
+     * @return True iff event id is in this account's specialist.
+     */
+    @Override
+    protected boolean isInSpecialist(String eventId) {
+        return organizedEvents.contains(eventId);
+    }
 }

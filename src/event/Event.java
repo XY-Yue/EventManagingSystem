@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 /**
  * An abstract entity class of events, stores name, ID, durationw, location, description, capacity,
- * and a list of attendees of the event.
+ * and a list of attendees of the event. Implements Serializable.
  * Abstract because there are different kind of events.
  * Methods in this class are some getter and setter for attributes in this class.
  * @author Group0694
@@ -16,24 +16,25 @@ import java.sql.Timestamp;
 abstract class Event implements Serializable {
     private final String name;
     private final String ID;
-    private SortedSet<Timestamp[]> duration;
-    private String location;
+    protected SortedSet<Timestamp[]> duration;
+    private EventObserver location;
     private final String description;
     private int capacity;
     private final List<String> attendee;
     private boolean isVIP = false;
     private final List<String> requiredFeatures;
+    private List<EventObserver> observers;
 
     /**
      * Constructs a event object
      * @param name name of the new event
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @param location room name of the new event held in
+     * @param location An instance of EventObserver that Room observes the Event
      * @param description description of the new event
      * @param capacity the max number of people can participate in the new event
      * @param id The unique ID of the event
      */
-    protected Event(String name, SortedSet<Timestamp[]> duration, String location,
+    protected Event(String name, SortedSet<Timestamp[]> duration, EventObserver location,
                     String description, int capacity, String id){
         this.name = name;
         this.ID = id;
@@ -43,6 +44,8 @@ abstract class Event implements Serializable {
         this.capacity = capacity;
         this.attendee = new ArrayList<>();
         this.requiredFeatures = new ArrayList<>();
+        this.observers = new ArrayList<>();
+        this.notifyRoomAdd();
     }
 
 
@@ -75,7 +78,7 @@ abstract class Event implements Serializable {
      * @return name of room which holds the event
      */
     protected String getLocation() {
-        return location;
+        return location.getName();
     }
 
     /**
@@ -88,11 +91,15 @@ abstract class Event implements Serializable {
     }
 
     /**
-     * Sets start time of this event. Gives a new start time to event.
+     * Sets start time of this event. Gives a new start time to event. In addition, it also notifies all the observers.
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      */
     protected void setTime(SortedSet<Timestamp[]> duration) {
+        this.notifyRoomRemove();
+        this.notifyHostRemove();
         this.duration = new TreeSet<>(duration);
+        this.notifyRoomAdd();
+        this.notifyHostAdd();
     }
 
     /**
@@ -148,10 +155,10 @@ abstract class Event implements Serializable {
     /**
      * Sets the Speaker of this event.
      * This is an abstract method which will be working on changing the speaker of event.
-     * @param speakers new speaker of event
+     * @param speakers An instance of EventWithSpecObserver, represents the new speaker of event
      * @return true if changed speaker successfully, else false
      */
-    protected abstract boolean changeHost(List<String> speakers);
+    protected abstract boolean changeHost(List<EventWithSpecObserver> speakers);
 
     /**
      * Gets the speaker of this event.
@@ -188,10 +195,14 @@ abstract class Event implements Serializable {
     protected void setCapacity(int capacity){ this.capacity = capacity; }
 
     /**
-     * Sets a new location for this event
-     * @param roomName The new location for a event, assumes it is valid
+     * Sets a new location for this event. In addition, it also notifies all the observers.
+     * @param room The new location for a event, assumes it is valid
      */
-    protected void setLocation(String roomName){ this.location = roomName;}
+    protected void setLocation(EventObserver room) {
+        this.notifyRoomRemove();
+        this.location = room;
+        this.notifyRoomAdd();
+    }
 
     /**
      * Checks if the event is VIP only
@@ -234,7 +245,6 @@ abstract class Event implements Serializable {
      * @return true iff not all new required features already exist in this event
      */
     protected boolean addRequiredFeatures(List<String> features){ return this.requiredFeatures.addAll(features); }
-
     /**
      * Gets all required features of this event
      * @return An iterator of requiredFeature list
@@ -255,4 +265,45 @@ abstract class Event implements Serializable {
         }
     }
 
+    /**
+     * Notifies all the attendee observers to add and update an event
+     */
+    protected void notifyAllObserversAdd() {
+        for (EventObserver observer : observers) {
+            observer.updateAdd(this.ID, this.duration);
+        }
+    }
+
+    /**
+     * Notifies all the attendee observers to remove and update an event
+     */
+    protected void notifyAllObserversRemove() {
+        for (EventObserver observer : observers) {
+            observer.updateRemove(this.ID, this.duration);
+        }
+    }
+
+    /**
+     * Notifies the room observer to add and update an event
+     */
+    protected void notifyRoomAdd() {
+        location.updateAdd(this.ID, this.duration);
+    }
+
+    /**
+     * Notifies the room observer to remove and update an event
+     */
+    protected void notifyRoomRemove() {
+        location.updateRemove(this.ID, this.duration);
+    }
+
+    /**
+     * Notifies the host observer to add and update an event
+     */
+    abstract protected void notifyHostAdd();
+
+    /**
+     * Notifies the host observer to remove and update an event
+     */
+    abstract protected void notifyHostRemove();
 }

@@ -1,11 +1,12 @@
 package account;
 
+import event.EventWithSpecObserver;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 
 /**
- * A use case class that can manager Account entity
+ * A use case class that can manager Account entity. Implements Serializable.
  * It stores all accounts。
  * @author Group0694
  * @version 2.0.0
@@ -367,16 +368,19 @@ public class AccountManager implements Serializable {
     /**
      * Finds all speakers that are free at the given time interval
      * @param eventDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
+     * @param eventId A String representation of event id
      * @return A list of speaker IDs that corresponds to speakers that are free at this time interval
      */
-    public List<String> getAvailableSpeakers(SortedSet<Timestamp[]> eventDuration){
+    public List<String> getAvailableSpeakers(SortedSet<Timestamp[]> eventDuration, String eventId){
         List<String> result = new ArrayList<>();
         Map<String, Account> map = allAccounts.get("speaker");
         if (map != null) {
-            for (String speaker : map.keySet()) {
-                for (Timestamp[] t : eventDuration) {
-                    if (!this.freeAtTime(t[0], t[1], speaker)) {
-                        break;
+            outer_loop: for (String speaker : map.keySet()) {
+                if (!this.checkInSpecialist(speaker, eventId)) {
+                    for (Timestamp[] t : eventDuration) {
+                        if (!this.freeAtTime(t[0], t[1], speaker)) {
+                            continue outer_loop;
+                        }
                     }
                 }
                 result.add(speaker);
@@ -468,7 +472,22 @@ public class AccountManager implements Serializable {
         return vipEvents; // It will be used to update the event manager
     }
 
+    /**
+     * Gets an instance of EventWithSpecObserver
+     * @param username A String representation of username
+     * @return An instance of EventWithSpecObserver. Return null if account does not exist.
+     */
+    public EventWithSpecObserver getEventObserver(String username) {
+        return findAccountByUsername(username);
+    }
 
+    private boolean checkInSpecialist(String username, String eventId) {
+        Account a = this.findAccountByUsername(username);
+        if (a != null) {
+            return a.isInSpecialist(eventId);
+        }
+        return false;
+    }
 }
 
 

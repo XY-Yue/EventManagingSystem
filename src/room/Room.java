@@ -1,12 +1,13 @@
 package room;
 
+import event.EventObserver;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
 
 /**
- * An entity class of Room.
+ * An entity class of Room. Implements Serializable, Available, EventObserver.
  * Stores capacity, available time, unique room name, schedule of a room, and a collection of features
  * Schedule is a map with start time map to event name.
  * availableTime is a map that maps the start hour to end hour of the room open time, 0 <= start time <= 23 and
@@ -15,7 +16,7 @@ import java.util.*;
  * @version 2.0.0
  */
 @SuppressWarnings("FieldMayBeFinal")
-class Room implements Serializable, Available{
+class Room implements Serializable, Available, EventObserver {
     private final Integer capacity;
     private NavigableMap<Integer, Integer> availableTime;
     private final String roomName; //Check for uniqueness
@@ -199,5 +200,38 @@ class Room implements Serializable, Available{
      */
     protected boolean hasFeatures(List<String> checkedFeatures){
         return features.containsAll(checkedFeatures);
+    }
+
+    /**
+     * Updates an event by adding to its schedule.
+     * @param eventId A String representation of the event id
+     * @param timeDuration A time duration of an event
+     */
+    @Override
+    public void updateAdd(String eventId, SortedSet<Timestamp[]> timeDuration) {
+        for (Timestamp[] t : timeDuration) {
+            this.schedule.put(t, eventId);
+        }
+    }
+
+    /**
+     * Updates an event by adding to its schedule.
+     * @param eventId A String representation of the event id
+     * @param timeDuration A time duration of an event
+     */
+    @Override
+    public void updateRemove(String eventId, SortedSet<Timestamp[]> timeDuration) {
+        for (Timestamp[] t : timeDuration) {
+            schedule.remove(t, eventId);
+        }
+    }
+
+    /**
+     * Gets A String representation of current instance.
+     * @return A String representation of the current room name.
+     */
+    @Override
+    public String getName() {
+        return this.roomName;
     }
 }

@@ -2,7 +2,6 @@ package event;
 
 import account.AccountManager;
 import room.RoomManager;
-
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
@@ -192,14 +191,14 @@ public class EventSchedulerSystem {
 
     }
 
-    private List<String> inputHost(Scanner sc, AccountManager accounts,
-                                   SortedSet<Timestamp[]> eventDuration, int speakerNum) {
-        List<String> speakers = accounts.getAvailableSpeakers(eventDuration);
+    private List<EventWithSpecObserver> inputHost(Scanner sc, AccountManager accounts,
+                                   SortedSet<Timestamp[]> eventDuration, int speakerNum, String eventId) {
+        List<String> speakers = accounts.getAvailableSpeakers(eventDuration, eventId);
         if (speakers.size() < speakerNum || (speakerNum == -1 && speakers.size() < 2)){
             presenter.printErrorMessage("Not enough speakers free at this time.");
             return null;
         }
-        List<String> host = new ArrayList<>();
+        List<EventWithSpecObserver> host = new ArrayList<>();
         while (speakers.size() > 0 && (speakerNum == -1 || host.size() < speakerNum)) {
             presenter.askTalkSpeaker(speakerNum);
             presenter.printMenu(speakers, "cancel scheduling speakers for this event");
@@ -210,7 +209,7 @@ public class EventSchedulerSystem {
             } else if (input.equalsIgnoreCase("r")) {
                 return null;
             } else if (input.matches("^[0-9]*$") && Integer.parseInt(input) < speakers.size()){
-                host.add(speakers.get(Integer.parseInt(input)));
+                host.add(accounts.getEventObserver(speakers.get(Integer.parseInt(input))));
                 speakers.remove(Integer.parseInt(input));
                 presenter.scheduleSpeakerMessage(true);
             }else {
@@ -269,7 +268,8 @@ public class EventSchedulerSystem {
         presenter.askEventDescription();
         String description = inputNonemptyString(sc);
 
-        String eventID = events.createEvent(type, name, timeDuration, location,
+        // Notify room observer and all empty observer list
+        String eventID = events.createEvent(type, name, timeDuration, rooms.getEventObserver(location),
                 description, capacity);
         int numHosts = events.numSpeakers(eventID);
 
@@ -277,18 +277,16 @@ public class EventSchedulerSystem {
 
         events.setRequiredFeatures(eventID, features);
 
-        List<String> host = inputHost(sc, accounts, timeDuration, numHosts);
+        List<EventWithSpecObserver> host = inputHost(sc, accounts, timeDuration, numHosts, eventID);
         if (host == null) {
+            // Notify room observer and all empty observer to remove event
             events.cancelEvent(eventID);
             presenter.eventCreateMessage(false);
         }
         else {
-            rooms.addEventToRoom(location, eventID, timeDuration);
+            // rooms.addEventToRoom(location, eventID, timeDuration);
             events.scheduleSpeaker(eventID, host);
-            for (String speaker : host) {
-                accounts.addToSpecialList(eventID, speaker);
-                accounts.signUpEvent(timeDuration, eventID, speaker);
-            }
+            events.updateHostAdd(eventID);
             accounts.addToSpecialList(eventID, organizerName);
             presenter.eventCreateMessage(true);
             presenter.descriptionMessage(events.provideDescription(eventID));
@@ -386,38 +384,22 @@ public class EventSchedulerSystem {
             presenter.rescheduleMessage(false);
             return;
         }
-        rooms.removeEventFromRoom(eventManager.getRoom(eventID), eventID, timeDuration);
-        rooms.addEventToRoom(room, eventID, timeDuration);
-        eventManager.changeRoom(eventID, room);
+        // Notify room add and remove
+        eventManager.changeRoom(eventID, rooms.getEventObserver(room));
         presenter.rescheduleMessage(true);
     }
 
     private void rescheduleSpeaker(Scanner c, String eventID,
                                    EventManager eventManager, AccountManager accountManager){
-        // Timestamp start = eventManager.getTime(eventID), end = eventManager.getEndTime(eventID);
         SortedSet<Timestamp[]> timeDuration = eventManager.getEventDuration(eventID);
-        List<String> prevSpeakers = new ArrayList<>();
-        eventManager.getHosts(eventID).forEachRemaining(prevSpeakers::add);
-        boolean success = false;
-
-        for (String speaker : prevSpeakers) {
-            accountManager.cancelEvent(timeDuration, eventID, speaker);
-            accountManager.removeFromSpecialList(eventID, speaker);
-        }
-        List<String> speakers = inputHost(c, accountManager, timeDuration, eventManager.numSpeakers(eventID));
+        List<EventWithSpecObserver> speakers = inputHost(c, accountManager, timeDuration,
+                eventManager.numSpeakers(eventID), eventID);
         if (speakers == null) {
-            speakers = prevSpeakers;
+            presenter.scheduleSpeakerMessage(false);
+        } else {
+            eventManager.scheduleSpeaker(eventID, speakers);
+            presenter.rescheduleMessage(true);
         }
-        else {
-            success = true;
-        }
-        for (String speaker : speakers) {
-            accountManager.signUpEvent(timeDuration, eventID, speaker);
-            accountManager.addToSpecialList(eventID, speaker);
-        }
-        eventManager.scheduleSpeaker(eventID, speakers);
-        if (success) presenter.rescheduleMessage(true);
-        else presenter.scheduleSpeakerMessage(false);
     }
 
     private List<Timestamp[]> checkTime(SortedSet<Timestamp[]> previousTimeSlot, SortedSet<Timestamp[]> currTimeSlot) {
@@ -457,8 +439,6 @@ public class EventSchedulerSystem {
         SortedSet<Timestamp[]> previousTimeDuration = eventManager.getEventDuration(eventID);
         List<String> speakers = new ArrayList<>();
         eventManager.getHosts(eventID).forEachRemaining(speakers::add);
-        String roomName = eventManager.getRoom(eventID);
-
         for (Timestamp[] lst : this.checkTime(previousTimeDuration, newTimeDuration)) {
             Timestamp t1 = lst[0];
             Timestamp t2 = lst[1];
@@ -475,11 +455,8 @@ public class EventSchedulerSystem {
                 }
             }
         }
+        // Notify room add and remove
         eventManager.rescheduleEvent(eventID, newTimeDuration);
-        for (String speaker : speakers) {
-            accountManager.cancelEvent(previousTimeDuration, eventID, speaker);
-            accountManager.signUpEvent(newTimeDuration, eventID, speaker);
-        }
         Iterator<String> lst = eventManager.getAttendees(eventID);
         while (lst.hasNext()) {
             String attendees = lst.next();
@@ -487,9 +464,6 @@ public class EventSchedulerSystem {
             if (accountManager.freeAtTime(newTimeDuration, attendees))
                 accountManager.signUpEvent(newTimeDuration, eventID, attendees);
         }
-        // Add back
-        rooms.removeEventFromRoom(roomName, eventID, previousTimeDuration);
-        rooms.addEventToRoom(roomName, eventID, newTimeDuration);
         presenter.rescheduleMessage(true);
     }
 
@@ -523,23 +497,12 @@ public class EventSchedulerSystem {
         if (eventId == null) return;
 
         SortedSet<Timestamp[]> previousTimeDuration = events.getEventDuration(eventId);
-        String room = events.getRoom(eventId);
-
         Iterator<String> lst = events.getAttendees(eventId);
         while (lst.hasNext()) {
             String users = lst.next();
             accounts.cancelEvent(previousTimeDuration, eventId, users);
         }
-        String speakers;
-        for (Iterator<String> i = events.getHosts(eventId); i.hasNext();) {
-            speakers = i.next();
-            accounts.removeFromSpecialList(eventId, speakers);
-            accounts.cancelEvent(previousTimeDuration, eventId, speakers);
-        }
-
-        rooms.removeEventFromRoom(room, eventId, previousTimeDuration);
         events.cancelEvent(eventId);
         presenter.cancelEvent();
     }
-
 }

@@ -13,31 +13,33 @@ import java.util.SortedSet;
  * @version 2.0.0
  */
 class Talk extends Event {
-    private String speaker;
+    private EventWithSpecObserver speaker;
 
     /**
      * Constructs a Talk object
      * @param name name of the Talk
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @param location room name of the Talk held in
+     * @param location An instance of EventObserver, represents the room name of the Talk held in
      * @param description description of the Talk
      * @param capacity the max number of people can participate in the Talk
      * @param id The unique ID of the Talk
      */
-    Talk(String name, SortedSet<Timestamp[]> duration , String location,
+    Talk(String name, SortedSet<Timestamp[]> duration , EventObserver location,
          String description, int capacity, String id) {
         super(name, duration, location, description, capacity, id);
     }
 
     /**
      * Changes the speaker of this talk by given new speaker.
-     * @param speakers new speaker of this talk
+     * @param speakers A collection of EventWithSpecObserver, represents the new speaker of this talk
      * @return true if there is exactly one speaker given, and changed speaker successfully, else false
      */
     @Override
-    public boolean changeHost(List<String> speakers) {
-        if (speakers == null || speakers.size() == 0) return false;
+    public boolean changeHost(List<EventWithSpecObserver> speakers) {
+        if (speakers == null || speakers.size() != 1) return false;
+        this.notifyHostRemove();
         this.speaker = speakers.get(0);
+        this.notifyHostAdd();
         return true;
     }
 
@@ -48,7 +50,7 @@ class Talk extends Event {
     @Override
     protected Iterator<String> getHosts() {
         List<String> speaker = new ArrayList<>();
-        speaker.add(this.speaker);
+        speaker.add(this.speaker.getName());
         return speaker.iterator();
     }
 
@@ -79,5 +81,23 @@ class Talk extends Event {
     @Override
     public String toString(){
         return super.toString() + "Host: " + speaker;
+    }
+
+    /**
+     * Notifies the host by adding current event to its schedule.
+     */
+    @Override
+    protected void notifyHostAdd() {
+        this.speaker.updateAddWithSpec(getId(), this.duration);
+    }
+
+    /**
+     * Notifies the host by removing current event from its schedule.
+     */
+    @Override
+    protected void notifyHostRemove() {
+        if (this.speaker != null) {
+            this.speaker.updateRemoveWithSpec(getId(), this.duration);
+        }
     }
 }

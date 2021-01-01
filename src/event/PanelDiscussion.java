@@ -13,31 +13,41 @@ import java.util.SortedSet;
  */
 class PanelDiscussion extends Event  {
 
-    private final List<String> host = new ArrayList<>();
+    private final List<EventWithSpecObserver> host = new ArrayList<>();
 
     /**
      * Constructs a PanelDiscussion object
      * @param name name of the PanelDiscussion
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @param location room name of the PanelDiscussion held in
+     * @param location An instance of EventObserver, represents the room name of the PanelDiscussion held in
      * @param description description of the PanelDiscussion
      * @param capacity the max number of people can participate in the PanelDiscussion
      * @param id The unique ID of the PanelDiscussion
      */
-    PanelDiscussion(String name, SortedSet<Timestamp[]> duration, String location, String description, int capacity, String id) {
+    PanelDiscussion(String name, SortedSet<Timestamp[]> duration, EventObserver location, String description, int capacity, String id) {
         super(name, duration, location, description, capacity, id);
     }
 
     /**
-     * Sets the Speakers of this PanelDiscussion.
-     * @param speakers new speakers of PanelDiscussion
-     * @return true meaning that the speakers are modified
+     * Sets the Speakers of this PanelDiscussion. In addition, it also notifies the observers.
+     * @param speakers A collection of EventWithSpecObserver instances, represents the new speakers of PanelDiscussion
+     * @return True iff the speakers are modified
      */
     @Override
-    protected boolean changeHost(List<String> speakers) {
+    protected boolean changeHost(List<EventWithSpecObserver> speakers) {
+        this.notifyHostRemove();
         host.clear();
         host.addAll(speakers);
+        this.notifyHostAdd();
         return true;
+    }
+
+    private List<String> getHostNames() {
+        List<String> o = new ArrayList<>();
+        for (EventObserver item : host) {
+            o.add(item.getName());
+        }
+        return o;
     }
 
     /**
@@ -46,7 +56,7 @@ class PanelDiscussion extends Event  {
      */
     @Override
     protected Iterator<String> getHosts() {
-        return host.iterator();
+        return this.getHostNames().iterator();
     }
 
     /**
@@ -80,10 +90,31 @@ class PanelDiscussion extends Event  {
 
     private String hostToString(){
         StringBuilder builder = new StringBuilder();
-        for (String speaker : host){
+        for (String speaker : this.getHostNames()){
             builder.append(speaker).append(", ");
         }
         if (builder.length() != 0) builder.delete(builder.length() - 2, builder.length());
         return builder.toString();
     }
+
+    /**
+     * Notifies hosts by adding current event to their schedule.
+     */
+    @Override
+    protected void notifyHostAdd() {
+        for(EventWithSpecObserver observer : host) {
+            observer.updateAddWithSpec(this.getId(), this.duration);
+        }
+    }
+
+    /**
+     * Notifies hosts by removing current event from their schedule.
+     */
+    @Override
+    protected void notifyHostRemove() {
+        for(EventWithSpecObserver observer : host) {
+            observer.updateRemoveWithSpec(this.getId(), this.duration);
+        }
+    }
+
 }

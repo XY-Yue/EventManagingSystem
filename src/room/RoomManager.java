@@ -1,12 +1,14 @@
 package room;
 
 
+import event.EventObserver;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 
 /**
- * An use case class of room.
+ * An use case class of room. Implements Serializable.
  * Stores all room in a map which has room name map to the corresponding Room object.
  * Contains constructor of room, which is able to construct a new room.
  * Methods in this class contains check room status, operating on specific room, and get room with given information.
@@ -143,30 +145,6 @@ public class RoomManager implements Serializable {
     }
 
     /**
-     * Adds an event to a room
-     * @param roomName A String representation of the room name
-     * @param eventID A String representation of the event id
-     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @return true iff the event is added successfully
-     */
-    public boolean addEventToRoom(String roomName, String eventID, SortedSet<Timestamp[]> timeDuration) {
-        // Return boolean not String so controller knows what needs to send to presenter
-        return roomList.get(roomName) != null && roomList.get(roomName).addEventToSchedule(timeDuration, eventID);
-    }
-
-    /**
-     * Removes an event from a room
-     * @param roomName A String representation of the room name
-     * @param eventName A String representation of the event id
-     * @param timeDuration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @return true iff the event is removed successfully
-     */
-    public boolean removeEventFromRoom(String roomName, String eventName, SortedSet<Timestamp[]> timeDuration) {
-        return roomList.get(roomName) != null && roomList.get(roomName).
-                removeEventFromSchedule(timeDuration, eventName);
-    }
-
-    /**
      * Gets the room capacity
      * @param roomName A String representation of given room
      * @return Maximum capacity of the given room, -1 if the room does not exist
@@ -212,5 +190,14 @@ public class RoomManager implements Serializable {
      */
     boolean addFeature(String feature){
         return roomFeatureList.add(feature);
+    }
+
+    /**
+     * Gets an instance of EventObserver
+     * @param roomName A String representation of the target room name.
+     * @return An instance of the room with given room name.
+     */
+    public EventObserver getEventObserver(String roomName) {
+        return this.roomList.get(roomName);
     }
 }

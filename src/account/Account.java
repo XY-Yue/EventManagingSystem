@@ -1,17 +1,18 @@
 package account;
 
+import event.EventWithSpecObserver;
 import room.Available;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.*;
 
-/** An abstract class represents all type of accounts.
+/** An abstract class represents all type of accounts. Implements Serializable, Available, EventWithSpecObserver.
  * An account can store this user account's username, password, friends list, associated events，and whether
  * this user account can do messaging operations.
  * @author Group0694
  * @version 2.0.0
  */
-public abstract class Account implements Serializable, Available {
+public abstract class Account implements Serializable, Available, EventWithSpecObserver {
     protected NavigableMap<Timestamp[], String> schedule;
     private final String username; // No getters as the username are already stored in use case
     private String password;
@@ -257,4 +258,65 @@ public abstract class Account implements Serializable, Available {
         }
     }
 
+    /**
+     * Checks if event id is in current account's specialist
+     * @param eventId A String representation of event id
+     * @return true iff event id is in current account's specialist
+     */
+    protected abstract boolean isInSpecialist(String eventId);
+
+    /**
+     * Adds and updates an event id to current account's schedule
+     * @param eventId A String representation of event id
+     * @param timeDuration Event's duration
+     */
+    @Override
+    public void updateAdd(String eventId, SortedSet<Timestamp[]> timeDuration) {
+        for (Timestamp[] t : timeDuration) {
+            this.schedule.put(t, eventId);
+        }
+    }
+
+    /**
+     * Removes and updates an event id from current account's schedule
+     * @param eventId A String representation of event id
+     * @param timeDuration Event's duration
+     */
+    @Override
+    public void updateRemove(String eventId, SortedSet<Timestamp[]> timeDuration) {
+        for (Timestamp[] t : timeDuration) {
+            schedule.remove(t, eventId);
+        }
+    }
+
+    /**
+     * Gets the current account's username
+     * @return A String representation of current account's username
+     */
+    @Override
+    public String getName() {
+        return this.username;
+    }
+
+    /**
+     * Adds and updates an event id to current account's schedule. In addition, also updates to its specialist.
+     * @param eventId A String representation of event's id
+     * @param timeDuration Event's duration
+     */
+    @Override
+    public void updateAddWithSpec(String eventId, SortedSet<Timestamp[]> timeDuration) {
+        this.updateAdd(eventId, timeDuration);
+        this.addToSpecialList(eventId);
+    }
+
+    /**
+     * Removes and updates an event id from current account's schedule. In addition, also updates to its specialist.
+     * @param eventId A String representation of event's id
+     * @param timeDuration Event's duration
+     */
+    @Override
+    public void updateRemoveWithSpec(String eventId, SortedSet<Timestamp[]> timeDuration) {
+        this.updateRemove(eventId, timeDuration);
+        this.removeFromSpecialList(eventId);
+    }
 }

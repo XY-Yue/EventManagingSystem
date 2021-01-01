@@ -17,23 +17,23 @@ class Party extends Event  {
      * Constructs a Party object
      * @param name name of the Party
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
-     * @param location room name of the Party held in
+     * @param location An instance of EventObserver, represents the room name of the Party held in
      * @param description description of the Party
      * @param capacity the max number of people can participate in the Party
      * @param id The unique ID of the Party
      */
-    Party(String name, SortedSet<Timestamp[]> duration, String location,
+    Party(String name, SortedSet<Timestamp[]> duration, EventObserver location,
           String description, int capacity, String id) {
         super(name, duration, location, description, capacity, id);
     }
 
     /**
      * Changes the host of the event, which is not allowed for party
-     * @param speakers new speaker of event
+     * @param speakers A collection of EventWithSpecObserver instances, represents the new speaker of event
      * @return false, as Party has no speakers
      */
     @Override
-    protected boolean changeHost(List<String> speakers) {
+    protected boolean changeHost(List<EventWithSpecObserver> speakers) {
         return false;
     }
 
@@ -72,5 +72,21 @@ class Party extends Event  {
     @Override
     public String toString(){
         return super.toString() + "Have fun!";
+    }
+
+    /**
+     * Not doing anything since this event doesn't have any host.
+     */
+    @Override
+    protected void notifyHostAdd() {
+
+    }
+
+    /**
+     * Not doing anything since this event doesn't have any host.
+     */
+    @Override
+    protected void notifyHostRemove() {
+
     }
 }
