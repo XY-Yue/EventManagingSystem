@@ -269,7 +269,8 @@ public class EventSchedulerSystem {
         String description = inputNonemptyString(sc);
 
         // Notify room observer and all empty observer list
-        String eventID = events.createEvent(type, name, timeDuration, rooms.getEventObserver(location),
+        String eventID = events.createEvent(type, name, accounts.getEventObserver(organizerName),
+                timeDuration, rooms.getEventObserver(location),
                 description, capacity);
         int numHosts = events.numSpeakers(eventID);
 
@@ -287,7 +288,7 @@ public class EventSchedulerSystem {
             // rooms.addEventToRoom(location, eventID, timeDuration);
             events.scheduleSpeaker(eventID, host);
             events.updateHostAdd(eventID);
-            accounts.addToSpecialList(eventID, organizerName);
+            // accounts.addToSpecialList(eventID, organizerName);
             presenter.eventCreateMessage(true);
             presenter.descriptionMessage(events.provideDescription(eventID));
         }
@@ -455,15 +456,7 @@ public class EventSchedulerSystem {
                 }
             }
         }
-        // Notify room add and remove
         eventManager.rescheduleEvent(eventID, newTimeDuration);
-        Iterator<String> lst = eventManager.getAttendees(eventID);
-        while (lst.hasNext()) {
-            String attendees = lst.next();
-            accountManager.cancelEvent(previousTimeDuration, eventID, attendees);
-            if (accountManager.freeAtTime(newTimeDuration, attendees))
-                accountManager.signUpEvent(newTimeDuration, eventID, attendees);
-        }
         presenter.rescheduleMessage(true);
     }
 
@@ -488,20 +481,12 @@ public class EventSchedulerSystem {
      * Cancelling an event only by Organizer. The event id is given by user input.
      * If the event id is invalid, print out feedback to user.
      * If the event id is valid, then cancel this event and print out the feedback that the event is removed successfully.
-     * @param accounts A copy of the AccountManager, used for canceling speakers and attendees
      * @param events A copy of the EventManager, used for removing events
      */
-    public void cancelEvent(EventManager events, AccountManager accounts) {
+    public void cancelEvent(EventManager events) {
         Scanner sc = new Scanner(System.in);
         String eventId = inputEventID(events, sc);
         if (eventId == null) return;
-
-        SortedSet<Timestamp[]> previousTimeDuration = events.getEventDuration(eventId);
-        Iterator<String> lst = events.getAttendees(eventId);
-        while (lst.hasNext()) {
-            String users = lst.next();
-            accounts.cancelEvent(previousTimeDuration, eventId, users);
-        }
         events.cancelEvent(eventId);
         presenter.cancelEvent();
     }

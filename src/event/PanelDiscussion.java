@@ -18,14 +18,16 @@ class PanelDiscussion extends Event  {
     /**
      * Constructs a PanelDiscussion object
      * @param name name of the PanelDiscussion
+     * @param organizer An instance of EventWithSpecObserver, represents the organizer of this event
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location An instance of EventObserver, represents the room name of the PanelDiscussion held in
      * @param description description of the PanelDiscussion
      * @param capacity the max number of people can participate in the PanelDiscussion
      * @param id The unique ID of the PanelDiscussion
      */
-    PanelDiscussion(String name, SortedSet<Timestamp[]> duration, EventObserver location, String description, int capacity, String id) {
-        super(name, duration, location, description, capacity, id);
+    PanelDiscussion(String name, EventWithSpecObserver organizer, SortedSet<Timestamp[]> duration,
+                    EventObserver location, String description, int capacity, String id) {
+        super(name, organizer, duration, location, description, capacity, id);
     }
 
     /**

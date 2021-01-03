@@ -83,12 +83,9 @@ public class AccountEventSystem {
         else if (!eventManager.canSignup(eventId)) presenter.signupFailEventFull();
 
         else if (!accountManager.freeAtTime(timeDuration, username)) presenter.signupFailNotFree();
-        else{
-            presenter.signUpEventResult(accountManager.signUpEvent(timeDuration, eventId, username));
-            if (accountManager.isAccountType(username, "vip")) {
-                accountManager.addToSpecialList(eventId, username);
-            }
-            eventManager.addAttendee(username, eventId);
+        else {
+            // Event will notify attendee observer
+            presenter.signUpEventResult(eventManager.addAttendee(accountManager.getEventObserver(username), eventId));
         }
     }
 
@@ -100,7 +97,7 @@ public class AccountEventSystem {
     public void cancelEvent(String username, EventManager eventManager) {
         String eventId = getValidEvent(eventManager);
         if (eventId == null) return;
-        if (eventManager.hasAttendee(eventId, username)) {
+        if (eventManager.hasAttendee(eventId, accountManager.getEventObserver(username))) {
             SortedSet<Timestamp[]> timeDuration = eventManager.getEventDuration(eventId);
             Timestamp currTime = new Timestamp(new Date().getTime());
             Timestamp firstStartTime = timeDuration.first()[0];
@@ -108,8 +105,8 @@ public class AccountEventSystem {
                 presenter.printEventExpired(eventId);
                 return;
             }
-            presenter.cancelEventResult(accountManager.cancelEvent(timeDuration, eventId, username));
-            eventManager.removeAttendee(username, eventId);
+            presenter.cancelEventResult(eventManager.removeAttendee(accountManager.getEventObserver(username),
+                    eventId));
         } else {
             presenter.userNotSignUpEvent(username, eventId);
         }

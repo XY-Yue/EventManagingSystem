@@ -124,7 +124,7 @@ class OrganizerSystem extends UserSystem {
                         accountEventSystem.getSpecialListEvents(this.username);
                         break;
                     case "4":
-                        eventSchedulerSystem.cancelEvent(eventManager, accountManager);
+                        eventSchedulerSystem.cancelEvent(eventManager);
                         break;
                     case "5":
                         eventSchedulerSystem.modifyEvent(eventManager, accountManager);

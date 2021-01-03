@@ -16,15 +16,16 @@ class Party extends Event  {
     /**
      * Constructs a Party object
      * @param name name of the Party
+     * @param organizer An instance of EventWithSpecObserver, represents the organizer of this event
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location An instance of EventObserver, represents the room name of the Party held in
      * @param description description of the Party
      * @param capacity the max number of people can participate in the Party
      * @param id The unique ID of the Party
      */
-    Party(String name, SortedSet<Timestamp[]> duration, EventObserver location,
+    Party(String name, EventWithSpecObserver organizer, SortedSet<Timestamp[]> duration, EventObserver location,
           String description, int capacity, String id) {
-        super(name, duration, location, description, capacity, id);
+        super(name, organizer, duration, location, description, capacity, id);
     }
 
     /**

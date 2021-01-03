@@ -18,15 +18,16 @@ class Talk extends Event {
     /**
      * Constructs a Talk object
      * @param name name of the Talk
+     * @param organizer An instance of EventWithSpecObserver, represents the organizer of this event
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location An instance of EventObserver, represents the room name of the Talk held in
      * @param description description of the Talk
      * @param capacity the max number of people can participate in the Talk
      * @param id The unique ID of the Talk
      */
-    Talk(String name, SortedSet<Timestamp[]> duration , EventObserver location,
+    Talk(String name, EventWithSpecObserver organizer, SortedSet<Timestamp[]> duration , EventObserver location,
          String description, int capacity, String id) {
-        super(name, duration, location, description, capacity, id);
+        super(name, organizer, duration, location, description, capacity, id);
     }
 
     /**
@@ -80,7 +81,7 @@ class Talk extends Event {
      */
     @Override
     public String toString(){
-        return super.toString() + "Host: " + speaker;
+        return super.toString() + "Host: " + speaker.getName();
     }
 
     /**

@@ -114,12 +114,12 @@ public class EventManager implements Serializable {
      * @param type the type of the event
      * @return return event id if create successfully, otherwise return null.
      */
-    String createEvent(String type, String name, SortedSet<Timestamp[]> timeDuration,
+    String createEvent(String type, String name, EventWithSpecObserver organizer, SortedSet<Timestamp[]> timeDuration,
                               EventObserver location, String description, int capacity) {
         numEvents = Math.max(numEvents, totalNumberOfEvents());
         String id = "E" + numEvents;
 
-        Event newEvent = new EventFactory().makeEvent(type, name, timeDuration, location,
+        Event newEvent = new EventFactory().makeEvent(type, name, organizer, timeDuration, location,
                 description, capacity, id);
         if (newEvent == null) return null;
 
@@ -161,24 +161,24 @@ public class EventManager implements Serializable {
 
     /**
      * Adds a given user as attendee into the event with given id.
-     * @param userName the username of user we want to add into event as attendee
+     * @param observer An instance of of EventWithSpecObserver, represents the attendee of this event
      * @param id id of the event we want to add the user in
      * @return true of added successfully, else false
      */
-    public boolean addAttendee(String userName, String id){
+    public boolean addAttendee(EventWithSpecObserver observer, String id){
         Event event = findEvent(id);
-        return !(event == null || event.isInEvent(userName)) && event.addAttendee(userName);
+        return !(event == null || event.isInEvent(observer)) && event.addAttendee(observer);
     }
 
     /**
      * Removes a given user from attendee of the event with given id.
-     * @param userName the username of user we want to remove from attendee of event
+     * @param observer An instance of EventWithSpecObserver, represents the attendee of this event
      * @param eventID id of the event we want to add the user in
      * @return true iff removed successfully
      */
-    public boolean removeAttendee(String userName, String eventID){
+    public boolean removeAttendee(EventWithSpecObserver observer, String eventID){
         Event event = findEvent(eventID);
-        return event != null && event.removeAttendee(userName);
+        return event != null && event.removeAttendee(observer);
     }
 
     /**
@@ -213,7 +213,7 @@ public class EventManager implements Serializable {
                     break;
                 }
             }
-            // Notify room
+            // Notify room, host, and attendee observers
             event.setTime(timeDuration);
             eventSchedule.computeIfAbsent(startTime, k -> new ArrayList<>());
             eventSchedule.get(startTime).add(new String[]{event.printEventDuration(), eventID, name});
@@ -233,6 +233,7 @@ public class EventManager implements Serializable {
         // Notify all observers remove
         event.notifyRoomRemove();
         event.notifyHostRemove();
+        event.notifyAttendeesRemove();
         for (Map<String, Event> eventMap : eventList.values()) {
             eventMap.remove(eventID);
         }
@@ -281,12 +282,12 @@ public class EventManager implements Serializable {
     /**
      * Checks if the attendee has signed up with the given event id
      * @param eventID id of the event
-     * @param username username of the user
+     * @param observer An instance of EventWithSpecObserver, represents the attendee of this event
      * @return true iff this user has signed up for this event
      */
-    public boolean hasAttendee(String eventID, String username) {
+    public boolean hasAttendee(String eventID, EventWithSpecObserver observer) {
         Event event = findEvent(eventID);
-        return event != null && event.isInEvent(username);
+        return event != null && event.isInEvent(observer);
     }
 
     /**
@@ -441,13 +442,13 @@ public class EventManager implements Serializable {
     /**
      * Removes the username from the vip events
      * @param vipEvents A collection of vip event ids
-     * @param username A String representation of the username been removed from the vip events
+     * @param observer An instance of EventWithSpecObserver, represents the attendee of this event
      */
-    public void updateVIPEvent(List<String> vipEvents, String username) {
+    public void updateVIPEvent(List<String> vipEvents, EventWithSpecObserver observer) {
         for (String eventId : vipEvents) {
             Event e = findEvent(eventId);
             if (e != null) {
-                e.removeAttendee(username);
+                e.removeAttendee(observer);
             }
         }
     }

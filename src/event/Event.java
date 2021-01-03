@@ -16,36 +16,37 @@ import java.sql.Timestamp;
 abstract class Event implements Serializable {
     private final String name;
     private final String ID;
+    private final EventWithSpecObserver organizer;
     protected SortedSet<Timestamp[]> duration;
     private EventObserver location;
     private final String description;
     private int capacity;
-    private final List<String> attendee;
+    private final List<EventWithSpecObserver> attendee;
     private boolean isVIP = false;
     private final List<String> requiredFeatures;
-    private List<EventObserver> observers;
-
     /**
-     * Constructs a event object
+     * Constructs a event object. Also notifies Room and Organizer of this event.
      * @param name name of the new event
+     * @param organizer An instance of EventWithSpecObserver, represents the organizer who created this event
      * @param duration A sorted collection of time interval where start time is at index 0 and end time is index 1
      * @param location An instance of EventObserver that Room observes the Event
      * @param description description of the new event
      * @param capacity the max number of people can participate in the new event
      * @param id The unique ID of the event
      */
-    protected Event(String name, SortedSet<Timestamp[]> duration, EventObserver location,
-                    String description, int capacity, String id){
+    protected Event(String name, EventWithSpecObserver organizer, SortedSet<Timestamp[]> duration,
+                    EventObserver location, String description, int capacity, String id){
         this.name = name;
         this.ID = id;
+        this.organizer = organizer;
         this.duration = duration;
         this.location = location;
         this.description = description;
         this.capacity = capacity;
         this.attendee = new ArrayList<>();
         this.requiredFeatures = new ArrayList<>();
-        this.observers = new ArrayList<>();
         this.notifyRoomAdd();
+        this.organizer.updateSpecAdd(this.ID);
     }
 
 
@@ -83,11 +84,11 @@ abstract class Event implements Serializable {
 
     /**
      * Checks if the user of given username is one of the attendees of this event.
-     * @param username the username of user we want to check
+     * @param observer An instance of EventWithSpecObserver, represents the attendee of this event
      * @return true if given username in attendee list, else false
      */
-    protected boolean isInEvent(String username) {
-        return attendee.contains(username);
+    protected boolean isInEvent(EventWithSpecObserver observer) {
+        return attendee.contains(observer);
     }
 
     /**
@@ -97,28 +98,57 @@ abstract class Event implements Serializable {
     protected void setTime(SortedSet<Timestamp[]> duration) {
         this.notifyRoomRemove();
         this.notifyHostRemove();
+        this.notifyAttendeesRemove();
         this.duration = new TreeSet<>(duration);
         this.notifyRoomAdd();
         this.notifyHostAdd();
+        for(EventWithSpecObserver observer : this.attendee) {
+            // Since we already remove all the attendee from old time without update its specialist for vip,
+            // if attendee is not free and is vip and event is vip, we remove the specialist
+            if(observer.freeAtThisTime(this.duration)) {
+                observer.updateAdd(this.ID, this.duration);
+            } else {
+                if (observer.isVip() && isVIP) {
+                    observer.updateSpecRemove(this.ID);
+                }
+            }
+        }
     }
 
     /**
      * Adds a new attendee to the attendee list of this event.
-     * @param attendeeName the username of user we want to add into attendee list
+     * @param attendeeObserver An instance of EventWithSpecObserver, represents the attendee of this event
      * @return true if added successfully, else false
      */
-    protected boolean addAttendee(String attendeeName) {
-        if (attendee.size() > capacity) return false;
-        return attendee.add(attendeeName);
+    protected boolean addAttendee(EventWithSpecObserver attendeeObserver) {
+        if (attendee.size() >= capacity) {
+            return false;
+        }
+        attendee.add(attendeeObserver);
+        if (attendeeObserver.isVip() && this.isVIP) {
+            attendeeObserver.updateAddWithSpec(this.ID, this.duration);
+        } else {
+            attendeeObserver.updateAdd(this.ID, this.duration);
+        }
+        return true;
     }
 
     /**
      * Removes an attendee from the attendee list of this event.
-     * @param attendeeName the username of user we want to remove from attendee list
+     * @param attendeeObserver An instance of EventWithSpecObserver, represents the attendee of this event
      * @return true if removed successfully, else false
      */
-    protected boolean removeAttendee(String attendeeName) {
-        return attendee.remove(attendeeName);
+    protected boolean removeAttendee(EventWithSpecObserver attendeeObserver) {
+        if (attendee.contains(attendeeObserver)) {
+            attendee.remove(attendeeObserver);
+            if (attendeeObserver.isVip() && this.isVIP) {
+                attendeeObserver.updateRemoveWithSpec(this.ID, this.duration);
+            } else {
+                attendeeObserver.updateRemove(this.ID, this.duration);
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -147,7 +177,7 @@ abstract class Event implements Serializable {
                 ((isVIP) ? "VIP ONLY\n" : "") +
                 "Time of event: \n" + // + getTime(startTime) + " to " + getTime(endTime) + "\n" +
                 this.printEventDuration() +
-                "Location of event: " + location + "\n" +
+                "Location of event: " + location.getName() + "\n" +
                 "Capacity of event: " + capacity + "\n" +
                 "Description of event :" + description + "\n";
     }
@@ -171,9 +201,13 @@ abstract class Event implements Serializable {
      * Gets the attendees of this event in a list.
      * This is an abstract method which will show attendees of the event.
      * @return An iterator of the attendee list
-     */
-    protected Iterator<String> getAttendees(){
-        return attendee.iterator();
+    */
+    protected Iterator<String> getAttendees() {
+        List<String> lst = new ArrayList<>();
+        for (EventObserver observer : attendee) {
+            lst.add(observer.getName());
+        }
+        return lst.iterator();
     }
 
     /**
@@ -266,19 +300,10 @@ abstract class Event implements Serializable {
     }
 
     /**
-     * Notifies all the attendee observers to add and update an event
-     */
-    protected void notifyAllObserversAdd() {
-        for (EventObserver observer : observers) {
-            observer.updateAdd(this.ID, this.duration);
-        }
-    }
-
-    /**
      * Notifies all the attendee observers to remove and update an event
      */
-    protected void notifyAllObserversRemove() {
-        for (EventObserver observer : observers) {
+    protected void notifyAttendeesRemove() {
+        for (EventWithSpecObserver observer : attendee) {
             observer.updateRemove(this.ID, this.duration);
         }
     }

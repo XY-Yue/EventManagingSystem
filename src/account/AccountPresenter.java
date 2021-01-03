@@ -166,7 +166,7 @@ class AccountPresenter extends MainPresenter {
      * Prints out feedback of if successfully cancelled an event.
      * @param r a boolean true if cancelled successfully, else false
      */
-    void cancelEventResult ( boolean r){
+    void cancelEventResult (boolean r){
         if (r) {
             super.printActionMessage("event canceled successfully.");
         } else {

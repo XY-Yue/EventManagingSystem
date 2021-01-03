@@ -319,4 +319,47 @@ public abstract class Account implements Serializable, Available, EventWithSpecO
         this.updateRemove(eventId, timeDuration);
         this.removeFromSpecialList(eventId);
     }
+
+    /**
+     * Check if account is free at this time duration.
+     * @param timeDuration A sorted set of Timestamp[], where each element has length 2, index 0 is start time, and
+     *                     index 1 is end time.
+     * @return True iff account is free during the given duration time.
+     */
+    @Override
+    public boolean freeAtThisTime(SortedSet<Timestamp[]> timeDuration) {
+        for (Timestamp[] t : timeDuration) {
+            if (!this.isAvailable(t[0], t[1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Updates and adds the event id to current account's specialist
+     * @param eventId A String representation of the event id
+     */
+    @Override
+    public void updateSpecAdd(String eventId) {
+        this.addToSpecialList(eventId);
+    }
+
+    /**
+     * Updates and removes the event if from current account's specialist
+     * @param eventId A String representation of the event id
+     */
+    @Override
+    public void updateSpecRemove(String eventId) {
+        this.removeFromSpecialList(eventId);
+    }
+
+    /**
+     * Check if current account is VIP account
+     * @return True iff current account is VIP account
+     */
+    @Override
+    public boolean isVip() {
+        return getType().equals("vip");
+    }
 }

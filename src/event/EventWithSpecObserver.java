@@ -22,4 +22,30 @@ public interface EventWithSpecObserver extends EventObserver {
      * @param timeDuration A time duration of an event.
      */
     void updateRemoveWithSpec(String eventId, SortedSet<Timestamp[]> timeDuration);
+
+    /**
+     * Checks if this observer is free during this duration
+     * @param timeDuration A collection of Timestamp[] where index 0 represents the start time and index 1 represents
+     *                     the end time.
+     * @return true iff this observer is free during this duration
+     */
+    boolean freeAtThisTime(SortedSet<Timestamp[]> timeDuration);
+
+    /**
+     * Updates and adds an event id to this observer's specialist
+     * @param eventId A String representation of this event id
+     */
+    void updateSpecAdd(String eventId);
+
+    /**
+     * Checks if this observer is VIP attendee
+     * @return true iff this observer is VIP attendee
+     */
+    boolean isVip();
+
+    /**
+     * Updates and removes an event id from this observer's specialist
+     * @param eventId A String representation of this event id
+     */
+    void updateSpecRemove(String eventId);
 }

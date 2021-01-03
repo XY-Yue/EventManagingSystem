@@ -160,7 +160,7 @@ public class AccountSystem {
         if (accounts.isAccountType(username, "vip")) {
             List<String> lst = accounts.degradeVIP(username, key);
             presenter.printDegradeAccount(true, username);
-            em.updateVIPEvent(lst, username);
+            em.updateVIPEvent(lst, accounts.getEventObserver(username));
             return;
         }
         presenter.printDegradeAccount(false, username);
