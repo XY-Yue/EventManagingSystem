@@ -52,9 +52,7 @@ User cannot send message to themselves.
 User cannot delete a message from archived message list, must unarchive first.
 
 ## Features:
-We managed to finish all mandatory features, 2 (or 3) optional features and some own features listed below:
 
-### Mandatory Features:
 _We have multiple types of event:_ 
 - Talk is one speaker
 - Party is no speaker
@@ -68,7 +66,6 @@ Events can be canceled by any organizer so at least one.
     Each event stores a maximum capacity. The maximum capacity of this event is less than or equal to the maximum
         capacity of the location of this event.
 
-### Optional Features:
 - More constrains in rooms when creating a new event: a room can have features such as computers/table/projector
         When organizers make a new event, the required features will be chosen prior to choosing rooms, and a list of
         available rooms with the required features and capacity/time will be provided. So the organizer can see a
@@ -79,7 +76,6 @@ Events can be canceled by any organizer so at least one.
         choose to see a schedule with given a time interval, by speaker, or location. In addition, they can also view
         the event they have signed up.
 
-### Own features:
 - Favourite list, user can add other username into their favourite list so they can find the username easily.
     A data converter to help convert between .txt files and .ser files. It is used for creating user account specifically.
     View message in order, form newest to oldest, or vice versa.
@@ -166,8 +162,7 @@ We will definitely continue working this project, improve existing code and fini
     implemented project that we can share on our future interviews.
 
 ## Last but not least: 
-really appreciated for all the extra works and providing an extra deadline.
+really appreciated for all the helps provided by our instructors!
 
-_Merry Christmas and Happy New Year! XD._
 "# EventManagingSystem" 
 "# EventManagingSystem" 
